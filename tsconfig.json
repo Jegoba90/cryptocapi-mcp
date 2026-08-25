@@ -18,6 +18,10 @@
     "noUnusedParameters": true,
     "verbatimModuleSyntax": true,
 
+    // Fijo, no heredado de la plataforma: tsc por defecto puede emitir CRLF en
+    // Windows y el shebang de `bin` dejaria de funcionar en Linux y macOS.
+    "newLine": "lf",
+
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },

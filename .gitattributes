@@ -1,0 +1,10 @@
+# Este paquete publica un ejecutable (`bin`), y un shebang que termine en CRLF
+# rompe el arranque en Linux y macOS: en silencio y recien despues de publicar.
+# Por eso los finales de linea se normalizan a LF en todo el repo y no se deja
+# librado a la plataforma de quien clona.
+* text=auto eol=lf
+
+# Binarios, sin tocar.
+*.png binary
+*.jpg binary
+*.ico binary
