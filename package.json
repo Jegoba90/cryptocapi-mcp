@@ -23,6 +23,18 @@
     "crypto",
     "market-analysis"
   ],
+  "homepage": "https://cryptocapi.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jegoba90/cryptocapi-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Jegoba90/cryptocapi-mcp/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
