@@ -32,18 +32,17 @@ function label(product: string | undefined): string {
  * Normaliza el cuerpo de error, porque hay **dos formas en la calle**.
  *
  * El commit `e21dc4c2` hizo que `code`, `required_product` y `your_product`
- * viajen planos, fuera de `message`. Pero ese cambio vive en `develop` y
- * **todavía no está desplegado**: `api.cryptocapi.com` sigue devolviendo el
- * objeto estructurado *serializado adentro de `message`*.
+ * viajen planos, fuera de `message`. Antes iban *serializados adentro de
+ * `message`*, y escribir el tool solo contra la forma nueva ya rompió una vez:
+ * el caso de la moneda restringida caía al mensaje genérico y le hablaba al
+ * agente de motores de cuantitativa cuando el problema era la moneda.
  *
- * Verificado en vivo el 2026-08-25 contra producción, que respondió
- * `message: "{\"code\":\"DEMO_COIN_RESTRICTED\",...}"`. Escribir el tool solo
- * contra el contrato nuevo lo dejaba sin entender a la API real: el caso de la
- * moneda restringida caía al mensaje genérico y le hablaba al agente de motores
- * de cuantitativa cuando el problema era la moneda.
- *
- * Se soportan las dos y se prefiere la plana cuando está. La rama anidada se
- * podrá borrar cuando el fix esté desplegado, no antes.
+ * **`api.cryptocapi.com` se desplegó el 2026-08-25 y ya manda la forma plana**,
+ * verificado en vivo. Aun así la rama que desanida **se queda**, por dos razones
+ * que no caducan: este paquete corre en la máquina de terceros y no controla
+ * contra qué versión de la API lo apuntan, y `CRYPTOCAPI_API_BASE` existe justo
+ * para apuntarlo a otra. Un entorno viejo o un despliegue revertido devuelven la
+ * forma anidada, y entender las dos no cuesta nada.
  */
 function normalizeErrorBody(data: unknown): ApiErrorBody | undefined {
   const parsed = ApiErrorBodySchema.safeParse(data);
