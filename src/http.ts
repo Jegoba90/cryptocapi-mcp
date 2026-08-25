@@ -23,6 +23,14 @@ export interface ApiResponse {
   readonly raw: string;
   /** Cuerpo parseado, solo para decidir. `undefined` si no era JSON. */
   readonly data: unknown;
+  /**
+   * Headers de la RESPUESTA, en minúsculas. Hacen falta para leer `Retry-After`
+   * al traducir un 429.
+   *
+   * Son los de la respuesta y nunca los de la request: esos llevan la API key
+   * y no pueden salir de este archivo (§11.5).
+   */
+  readonly headers: Readonly<Record<string, string>>;
 }
 
 /** Falla que el tool tiene que traducir a lenguaje de agente (§4.4). */
@@ -90,7 +98,15 @@ export class CryptoCapiClient {
       // query. Si algún día se moviera a la query, esto la filtraría por stderr.
       log.info(`${init.method} ${url.pathname} -> ${response.status}`);
 
-      return { status: response.status, raw, data };
+      // Nombre distinto de los headers de la request a propósito: son los de la
+      // RESPUESTA. Confundirlos es como se filtra la API key (§11.5), y de hecho
+      // llamarlos igual hacía que este bloque tapara al otro.
+      const responseHeaders: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        responseHeaders[key.toLowerCase()] = value;
+      });
+
+      return { status: response.status, raw, data, headers: responseHeaders };
     } catch (error: unknown) {
       if (error instanceof Error && error.name === 'AbortError') {
         throw new ApiRequestError(
