@@ -33,43 +33,75 @@ export interface ApiResponse {
   readonly headers: Readonly<Record<string, string>>;
 }
 
-/** Falla que el tool tiene que traducir a lenguaje de agente (§4.4). */
+/**
+ * Falla que el tool tiene que traducir a lenguaje de agente (§4.4).
+ *
+ * Los campos se declaran y asignan a mano en vez de usar *parameter properties*
+ * (`constructor(readonly kind: ...)`). No es estilo: el runner de tests es el
+ * nativo de Node, que quita los tipos sin transpilar, y esa azúcar sintáctica
+ * necesita transformación. Escribirlo así deja los tests corriendo sin sumar un
+ * transpilador, que sería una dependencia más (§11.7).
+ */
 export class ApiRequestError extends Error {
-  constructor(
-    message: string,
-    readonly kind: 'timeout' | 'network' | 'http',
-    readonly status?: number,
-    readonly body?: unknown
-  ) {
+  readonly kind: 'timeout' | 'network' | 'http';
+  readonly status: number | undefined;
+  readonly body: unknown;
+
+  constructor(message: string, kind: 'timeout' | 'network' | 'http', status?: number, body?: unknown) {
     super(message);
     this.name = 'ApiRequestError';
+    this.kind = kind;
+    this.status = status;
+    this.body = body;
   }
 }
 
 export class CryptoCapiClient {
-  constructor(private readonly config: Config) {}
+  private readonly config: Config;
 
-  async get(path: string, query?: Record<string, string | number | undefined>): Promise<ApiResponse> {
+  constructor(config: Config) {
+    this.config = config;
+  }
+
+  async get(
+    path: string,
+    query?: Record<string, string | number | undefined>,
+    timeoutMs?: number
+  ): Promise<ApiResponse> {
     const url = new URL(`${this.config.baseUrl}${path}`);
     if (query) {
       for (const [key, value] of Object.entries(query)) {
         if (value !== undefined) url.searchParams.set(key, String(value));
       }
     }
-    return this.send(url, { method: 'GET' });
+    return this.send(url, { method: 'GET' }, timeoutMs);
   }
 
-  async post(path: string, body: unknown): Promise<ApiResponse> {
-    return this.send(new URL(`${this.config.baseUrl}${path}`), {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+  async post(path: string, body: unknown, timeoutMs?: number): Promise<ApiResponse> {
+    return this.send(
+      new URL(`${this.config.baseUrl}${path}`),
+      { method: 'POST', body: JSON.stringify(body) },
+      timeoutMs
+    );
   }
 
-  private async send(url: URL, init: { method: string; body?: string }): Promise<ApiResponse> {
+  private async send(
+    url: URL,
+    init: { method: string; body?: string },
+    timeoutOverride?: number
+  ): Promise<ApiResponse> {
     // Presupuesto de tiempo propio: ninguna espera sin límite (§11.4).
+    //
+    // El override por tool existe porque no todos los endpoints cuestan lo
+    // mismo: los de cuantitativa el backend los sirve en hilos con su propio
+    // límite, y cortarlos con el presupuesto de un endpoint de lectura daría un
+    // timeout falso. Si el usuario fijó CRYPTOCAPI_TIMEOUT_MS a mano, esa
+    // decisión gana sobre el override.
+    const budget = this.config.timeoutExplicit
+      ? this.config.timeoutMs
+      : (timeoutOverride ?? this.config.timeoutMs);
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.config.timeoutMs);
+    const timer = setTimeout(() => controller.abort(), budget);
 
     const headers: Record<string, string> = {
       'x-api-key': this.config.apiKey,

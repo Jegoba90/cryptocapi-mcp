@@ -26,6 +26,26 @@ import { CryptoCapiClient, ApiRequestError, type ApiResponse } from './http.js';
 import { explainHttpError, explainRequestError } from './errors.js';
 
 /**
+ * Presupuestos de tiempo por tool (§11.4).
+ *
+ * No todos los endpoints cuestan lo mismo: los de cuantitativa el backend los
+ * sirve en hilos con su propio límite, así que cortarlos con el presupuesto de
+ * una lectura daría un timeout falso y el agente concluiría que la API está
+ * caída cuando en realidad estaba trabajando.
+ *
+ * Un usuario que fija `CRYPTOCAPI_TIMEOUT_MS` gana sobre esto: está diciendo
+ * algo sobre su propia red y no corresponde ignorarlo.
+ */
+const BUDGET_MS = {
+  /** Lecturas de tablas ya calculadas. */
+  lectura: 10_000,
+  /** Un motor, un activo. */
+  motor: 20_000,
+  /** Varios activos, o un recorrido del mercado entero. */
+  motorPesado: 45_000,
+} as const;
+
+/**
  * Envuelve una llamada a la API en el contrato de salida del tool.
  *
  * Éxito: el cuerpo verbatim y nada más. Error: el texto traducido, nunca el
@@ -62,7 +82,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'plan ni API key.',
       inputSchema: {},
     },
-    async () => respond(() => client.get('/market/market-summary'))
+    async () => respond(() => client.get('/market/market-summary', undefined, BUDGET_MS.lectura))
   );
 
   server.registerTool(
@@ -82,7 +102,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
           .describe('Cuántos activos devolver. Por defecto los devuelve todos.'),
       },
     },
-    async ({ limit }) => respond(() => client.get('/market/prices/latest', { limit }))
+    async ({ limit }) => respond(() => client.get('/market/prices/latest', { limit }, BUDGET_MS.lectura))
   );
 
   server.registerTool(
@@ -94,7 +114,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'relacionadas. Endpoint público: no requiere plan ni API key.',
       inputSchema: {},
     },
-    async () => respond(() => client.get('/market/macro'))
+    async () => respond(() => client.get('/market/macro', undefined, BUDGET_MS.lectura))
   );
 
   // ---------------------------------------------------------------------------
@@ -127,7 +147,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
       },
     },
     async ({ coin_id, view, engine }) =>
-      respond(() => client.get(`/market/insights/${encodeURIComponent(coin_id)}`, { view, engine }))
+      respond(() => client.get(`/market/insights/${encodeURIComponent(coin_id)}`, { view, engine }, BUDGET_MS.motor))
   );
 
   // ---------------------------------------------------------------------------
@@ -151,7 +171,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
       },
     },
     async ({ symbol }) =>
-      respond(() => client.get(`/quant/${encodeURIComponent(symbol.toUpperCase())}/signal`))
+      respond(() => client.get(`/quant/${encodeURIComponent(symbol.toUpperCase())}/signal`, undefined, BUDGET_MS.motor))
   );
 
   server.registerTool(
@@ -170,7 +190,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
           .describe('Identificadores de moneda, de 1 a 50: ["bitcoin", "ethereum"].'),
       },
     },
-    async ({ symbols }) => respond(() => client.post('/quant/batch', { symbols }))
+    async ({ symbols }) => respond(() => client.post('/quant/batch', { symbols }, BUDGET_MS.motorPesado))
   );
 
   server.registerTool(
@@ -196,6 +216,6 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
       },
     },
     async ({ strategy, limit }) =>
-      respond(() => client.get('/quant/market-scan', { strategy, limit }))
+      respond(() => client.get('/quant/market-scan', { strategy, limit }, BUDGET_MS.motorPesado))
   );
 }

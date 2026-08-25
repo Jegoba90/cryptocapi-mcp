@@ -1,0 +1,21 @@
+{
+  "status": "success",
+  "data": {
+    "engine_used": "radar",
+    "asset": { "id": "bitcoin", "symbol": "BTC" },
+    "summary": "Lateralizacion de rango.",
+    "sentiment": "neutral",
+    "math_diagnostics": {
+      "z_score": 1.50,
+      "z_score_threshold": 3.5051,
+      "bollinger_bandwidth": 1e2,
+      "volume_notional": 12345678901234567890,
+      "audit_trail": {
+        "protocol_hash": "0xdeadbeefcafe0001",
+        "calculated_at": "2026-08-25T12:00:00.000000Z",
+        "seal_type": "process_seal",
+        "filters_applied": ["zscore", "regime"]
+      }
+    }
+  }
+}

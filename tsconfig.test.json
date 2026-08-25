@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // El `rootDir: src` del build no aplica acá: esto no emite nada y tiene que
+    // abarcar `test/` además de `src/`.
+    "rootDir": ".",
+    // Los tests importan el helper por su ruta `.ts` real, porque el runner es
+    // el nativo de Node y carga TypeScript sin transpilar. El código de `src/`
+    // no puede hacer esto: ahí las importaciones llevan `.js` porque apuntan al
+    // artefacto compilado.
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

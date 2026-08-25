@@ -15,6 +15,12 @@ export interface Config {
   readonly baseUrl: string;
   readonly apiKey: string;
   readonly timeoutMs: number;
+  /**
+   * true si el usuario fijó `CRYPTOCAPI_TIMEOUT_MS` a mano. Cuando lo hizo, su
+   * número manda sobre el presupuesto que cada tool pide para sí: quien toca esa
+   * variable está diciendo algo sobre SU red, y no corresponde ignorarlo.
+   */
+  readonly timeoutExplicit: boolean;
   /** true cuando el usuario no puso key y caímos en la demo pública. */
   readonly usingDemoKey: boolean;
 }
@@ -28,13 +34,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const baseUrl = env['CRYPTOCAPI_API_BASE']?.trim() || DEFAULT_BASE_URL;
 
   const rawTimeout = Number(env['CRYPTOCAPI_TIMEOUT_MS']);
-  const timeoutMs =
-    Number.isFinite(rawTimeout) && rawTimeout > 0 ? rawTimeout : DEFAULT_TIMEOUT_MS;
+  const timeoutExplicit = Number.isFinite(rawTimeout) && rawTimeout > 0;
+  const timeoutMs = timeoutExplicit ? rawTimeout : DEFAULT_TIMEOUT_MS;
 
   return {
     baseUrl: baseUrl.replace(/\/+$/, ''),
     apiKey,
     timeoutMs,
+    timeoutExplicit,
     usingDemoKey: apiKey === DEMO_API_KEY,
   };
 }

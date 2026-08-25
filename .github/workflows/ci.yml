@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Si llegan varios commits seguidos, cancela los viejos y corre solo el último.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Tipos y tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # El runner de tests es el nativo de Node, que carga TypeScript sin
+      # transpilar. Eso exige Node 22.18 o superior, aunque el paquete
+      # publicado corra en 20: es requisito de desarrollo, no de uso.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  compatibilidad:
+    name: El artefacto arranca en Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # `engines` promete Node 20 en adelante, y §11.3 dice que lo prometido
+      # tiene que estar enforced. Esto comprueba que el binario construido
+      # arranca, hace el handshake MCP y lista los tools en cada versión, sin
+      # depender del type stripping que solo tienen las nuevas.
+      - name: Handshake MCP contra el binario construido
+        run: |
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"0"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
+            | node dist/index.js 2>/dev/null > salida.jsonl
+          node -e "
+            const fs = require('fs');
+            const lineas = fs.readFileSync('salida.jsonl', 'utf8').split('\n').filter(Boolean);
+            for (const l of lineas) {
+              const m = JSON.parse(l);
+              if (m.jsonrpc !== '2.0') throw new Error('stdout con contenido que no es protocolo');
+            }
+            const lista = lineas.map(l => JSON.parse(l)).find(m => m.id === 2);
+            const total = lista.result.tools.length;
+            if (total !== 7) throw new Error('se esperaban 7 tools y hay ' + total);
+            console.log('handshake OK, 7 tools');
+          "
+
+  dependencias:
+    name: Auditoría del árbol heredado
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      # El paquete corre en la máquina del usuario con su API key, así que cada
+      # dependencia es superficie de cadena de suministro. El árbol es en su
+      # mayoría heredado del SDK oficial y no lo elegimos, razón de más para
+      # mirarlo: es lo que quedó pendiente al reescribir §11.7.
+      - run: npm audit --audit-level=high
