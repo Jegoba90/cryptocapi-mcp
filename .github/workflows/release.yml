@@ -1,0 +1,60 @@
+name: Release
+
+# Se dispara por tag, no por push a main: publicar es un acto deliberado y no
+# un efecto secundario de mergear. El tag es la decisión.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  # Sin esto npm no puede firmar la procedencia. Es el permiso que convierte
+  # este workflow en algo verificable: liga el tarball a este commit y a este
+  # archivo. Ojo, la procedencia SOLO funciona con el repositorio público; en
+  # uno privado npm falla con "Only public source repositories are supported".
+  id-token: write
+
+jobs:
+  publicar:
+    name: Publicar en npm con procedencia
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - run: npm ci
+
+      # Un tag que no coincide con la version publica algo que nadie pidió, y
+      # en npm una version no se puede reusar: el error no se deshace. Se corta
+      # acá, antes de construir nada.
+      - name: El tag coincide con la version del package.json
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "El tag dice $TAG y el package.json dice $PKG."
+            exit 1
+          fi
+          echo "Publicando $PKG"
+
+      # Las mismas puertas que el CI de todos los días: tipos, los 21 tests y
+      # la auditoría del árbol heredado. Se repiten a propósito, porque un tag
+      # puede apuntar a un commit que el CI nunca vio.
+      - run: npm run check
+
+      # `--access public` porque el scope @cryptocapi es privado por defecto, y
+      # `--provenance` explícito aunque el package.json ya lo pida: quien lea
+      # este archivo tiene que ver qué se publica y cómo, sin abrir otro.
+      - name: npm publish
+        run: npm publish --access public --provenance
+        env:
+          # Token granular acotado a la org, guardado como secret del repo. Los
+          # siguientes releases pueden pasar a trusted publishing con OIDC y
+          # dejar de usar token, pero eso se configura en npmjs.com sobre un
+          # paquete que YA existe, así que el primero necesita token sí o sí.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

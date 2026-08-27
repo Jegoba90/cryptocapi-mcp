@@ -2,8 +2,6 @@
 
 Servidor MCP de **CryptoCapi**: análisis de mercado cripto con sello verificable, expuesto como herramientas nativas para agentes.
 
-> 🚧 **En construcción.** Las siete herramientas funcionan contra la API de producción, pero **el paquete todavía no está publicado en npm**, así que el `npx` de abajo aún no resuelve. Falta la tanda de pruebas automatizadas y el CI.
-
 ## Las siete herramientas
 
 | Herramienta | Qué devuelve | Qué requiere |
@@ -52,6 +50,16 @@ curl -H "x-api-key: demo_btc_eth_public" \
 Tienen que ser idénticos. Si algún día no lo son, es un fallo de este paquete y merece un issue.
 
 **El límite, dicho también:** el sello prueba que el cálculo es reproducible y que no lo escribió un modelo de lenguaje. No prueba que el análisis acierte, y hoy es un checksum sin firma criptográfica, así que acredita integridad, no origen.
+
+### Y el paquete también se verifica
+
+El sello cubre los datos. Que el tarball que te bajás sea el que salió de este código lo cubre otra cosa: se publica **desde CI con procedencia de npm**, así que cada versión queda ligada al commit y al workflow que la construyeron.
+
+```bash
+npm audit signatures
+```
+
+En la página del paquete en npm aparece además el enlace al commit exacto. Es el mismo principio que el `protocol_hash`, aplicado a la cadena de suministro en vez de a los datos: no hace falta creernos, se comprueba.
 
 ## Configuración
 
