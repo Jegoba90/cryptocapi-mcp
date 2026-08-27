@@ -47,14 +47,28 @@ jobs:
       # puede apuntar a un commit que el CI nunca vio.
       - run: npm run check
 
-      # `--access public` porque el scope @cryptocapi es privado por defecto, y
-      # `--provenance` explícito aunque el package.json ya lo pida: quien lea
-      # este archivo tiene que ver qué se publica y cómo, sin abrir otro.
+      # El trusted publishing exige npm >= 11.5.1, y la que trae Node 24 puede
+      # ser anterior. Sin esto el publish cae de nuevo al camino del token y
+      # falla pidiendo credenciales que ya no existen.
+      - name: npm al día (requisito del trusted publishing)
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      # Sin token. Desde el 2026-08-27 la autenticación es **trusted publishing**:
+      # npm reconoce el OIDC de este workflow (de ahí `id-token: write` arriba) y
+      # emite una credencial efímera, atada a este repositorio y a este archivo,
+      # que no se puede copiar ni reutilizar fuera de acá.
+      #
+      # Reemplaza al token granular que publicó la 0.1.0. Ese token tenía que
+      # llevar «bypass 2FA» para funcionar sin que nadie tipeara un código, o sea
+      # que era una credencial de larga vida, con permiso de escritura sobre todo
+      # el scope y capaz de saltear el segundo factor. Se creó con 7 días de vida
+      # a propósito y se revocó al configurar esto.
+      #
+      # Requisito que no está acá y hay que saber: en npmjs.com, en Settings del
+      # paquete → Trusted publishing, tiene que figurar este repo y el nombre
+      # EXACTO de este archivo (`release.yml`). Si se renombra el workflow, el
+      # publish deja de autenticar.
       - name: npm publish
         run: npm publish --access public --provenance
-        env:
-          # Token granular acotado a la org, guardado como secret del repo. Los
-          # siguientes releases pueden pasar a trusted publishing con OIDC y
-          # dejar de usar token, pero eso se configura en npmjs.com sobre un
-          # paquete que YA existe, así que el primero necesita token sí o sí.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
