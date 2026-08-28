@@ -75,9 +75,23 @@ Conseguir una key con prueba de 14 días: [cryptocapi.com](https://cryptocapi.co
 
 ```bash
 npm install
-npm run typecheck
-npm run build
+npm run check   # tipos + tests + auditoría de dependencias
 ```
+
+Los tests corren con el runner nativo de Node y **no tienen una sola dependencia de test ni tocan la red**: la API se levanta falsa con `node:http`. Prueban el paquete, no el servicio, que es lo que los hace rápidos y estables.
+
+Eso deja afuera a propósito una mitad: si el paquete publicado se porta bien contra la API real y dentro de un agente. Para eso está [PRUEBAS.md](PRUEBAS.md), catorce comprobaciones manuales que se corren después de cada release.
+
+### Publicar
+
+Se dispara con un tag y publica desde CI con procedencia:
+
+```bash
+npm version <patch|minor|major>   # y commitear
+git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
+```
+
+El workflow comprueba primero que el tag coincida con la versión del `package.json`, porque **en npm una versión no se puede reusar** y ese error no se deshace. La autenticación es *trusted publishing* por OIDC, sin token: está atada al nombre de `release.yml`, así que renombrar ese archivo rompe la publicación.
 
 ## Licencia
 
