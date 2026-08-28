@@ -92,7 +92,16 @@ Esperado: el error nombra el motor que hace falta (**Quant Pro**), no un «PRO»
 
 Probá también **«escaneá el mercado»** y **«dame las señales de bitcoin y ethereum»**: tienen que nombrar **Market Scan** y **Quant Plus** respectivamente. Son tres pases que se venden por separado, así que tres mensajes distintos.
 
-> **Este check falló la primera vez que se corrió, el 2026-08-28.** Las tres rutas devolvían el mismo texto —«Quantitative signals require a PRO plan subscription»— sin `code` ni `required_product`, así que el MCP no tenía con qué nombrar el motor. Se arregló en el backend, no en el paquete. Si vuelve a fallar, mirá primero si la API está emitiendo el código: `curl -i -H "x-api-key: demo_btc_eth_public" https://api.cryptocapi.com/v1/quant/BTCUSDT/signal` tiene que traer `"code":"PRODUCT_NOT_INCLUDED"`.
+> **Este check falló la primera vez que se corrió, el 2026-08-28, y quedó en verde ese mismo día.** Las tres rutas devolvían el mismo texto —«Quantitative signals require a PRO plan subscription»— sin `code` ni `required_product`, así que el MCP no tenía con qué nombrar el motor. **Se arregló en el backend, no en el paquete**, y la `0.1.0` que ya estaba publicada empezó a nombrar los tres pases sin republicar nada.
+>
+> Si vuelve a fallar, mirá primero si la API está emitiendo el código, porque lo más probable es que el problema no esté acá:
+>
+> ```bash
+> curl -H "x-api-key: demo_btc_eth_public" \
+>   https://api.cryptocapi.com/v1/quant/BTCUSDT/signal
+> ```
+>
+> Tiene que traer `"code":"PRODUCT_NOT_INCLUDED"` y `"required_product":"quant"`. Si eso está bien y el mensaje del agente igual sale genérico, ahí sí el problema es del paquete.
 
 ### 7 bis. Un pase que compraste y se venció
 
