@@ -7,7 +7,16 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
-    "sourceMap": true,
+
+    // Apagado a propósito. `files` publica `dist` y no `src`, así que los mapas
+    // viajaban apuntando a fuentes que no están en el tarball: peso muerto que
+    // además promete una capacidad de depuración que no existe.
+    //
+    // Medido contra la 0.1.0 publicada: 26 archivos y 53,8 kB descomprimidos
+    // pasan a 18 y 44,1 kB. La alternativa era publicar `src`, que engorda el
+    // paquete para siempre a cambio de un solo caso —depurar el paquete ya
+    // instalado— que se resuelve mejor clonando el repo.
+    "sourceMap": false,
 
     "strict": true,
     "noUncheckedIndexedAccess": true,
