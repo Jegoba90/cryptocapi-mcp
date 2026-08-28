@@ -1,6 +1,6 @@
 {
   "name": "@cryptocapi/mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Servidor MCP de CryptoCapi: analisis cripto con sello verificable, expuesto como tools nativas para agentes.",
   "type": "module",
   "license": "MIT",
