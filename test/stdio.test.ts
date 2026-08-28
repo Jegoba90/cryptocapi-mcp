@@ -13,6 +13,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { startFakeApi } from './helpers/fake-api.ts';
 
@@ -103,6 +104,27 @@ test('stdout lleva SOLO JSON-RPC, y el diagnóstico sale por stderr', async () =
   } finally {
     await api.close();
   }
+});
+
+test('el servidor se presenta con la versión publicada, no con una inventada', async () => {
+  // La 0.1.0 salió declarando '0.0.0' porque la versión era un literal en
+  // index.ts. Todo cliente MCP muestra ese número, así que un reporte de bug no
+  // permitía saber qué código corría del otro lado. Este test ata las dos puntas.
+  const manifiesto: unknown = JSON.parse(
+    readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+  );
+  const esperada = (manifiesto as { version: string }).version;
+
+  const { stdout } = await correrServidor('http://127.0.0.1:1/v1');
+  const inicializacion = stdout
+    .split('\n')
+    .filter((l) => l.trim() !== '')
+    .map((l) => JSON.parse(l) as { id?: number; result?: { serverInfo?: { version?: string } } })
+    .find((r) => r.id === 1);
+
+  assert.ok(inicializacion, 'el handshake tiene que responder');
+  assert.equal(inicializacion.result?.serverInfo?.version, esperada);
+  assert.notEqual(esperada, '0.0.0', 'el manifiesto no puede quedar en la versión de plantilla');
 });
 
 test('el servidor arranca aunque la API esté caída: el fallo es del tool, no del proceso', async () => {
