@@ -98,6 +98,20 @@ export function explainHttpError(response: ApiResponse): string {
         );
       }
 
+      // Compró este motor y el pase dejó de estar activo. Separado de
+      // PRODUCT_NOT_INCLUDED porque la salida del usuario es la contraria:
+      // renovar lo que ya tiene, no comprarlo de nuevo. Decirle "no lo incluye"
+      // a quien lo pagó es falso y lo manda a la página equivocada.
+      if (body?.code === KNOWN_ERROR_CODES.PRODUCT_NOT_ACTIVE) {
+        const need = label(body.required_product);
+        return (
+          `El pase ${need} de esta API key ya no está activo: venció o se dio de baja. ` +
+          'La key sigue siendo válida, y los motores que tenga vigentes siguen respondiendo.' +
+          '\n\nNo es un problema de los argumentos y reintentar no lo cambia. Lo que ' +
+          `corresponde es renovar ${need}, no comprarlo otra vez: ${TRIAL_URL}`
+        );
+      }
+
       if (body?.code === KNOWN_ERROR_CODES.DEMO_COIN_RESTRICTED) {
         return (
           `${apiMessage}\n\n` +
@@ -107,12 +121,31 @@ export function explainHttpError(response: ApiResponse): string {
         );
       }
 
-      // 403 sin código máquina: las rutas de quant lo devuelven así cuando la
-      // key es de demostración. Es deuda conocida del backend (plan §6).
+      // 403 sin código máquina. Hasta el 2026-08-28 las tres rutas de quant
+      // caían acá con un texto único, y por eso este fallback hablaba de
+      // motores de cuantitativa: era el caso que más lo pisaba. Desde que el
+      // backend emite PRODUCT_NOT_INCLUDED y PRODUCT_NOT_ACTIVE ya no llegan,
+      // y lo que queda son los 403 en que el problema es LA KEY: inválida, mal
+      // copiada o revocada. A ese usuario el texto viejo lo mandaba a comprar
+      // un plan que no le iba a arreglar nada.
+      //
+      // Acá no hay `code` que mirar, así que la detección va por texto. Es
+      // frágil y está asumido: si no acierta, el mensaje neutro de más abajo
+      // sigue siendo cierto, que es lo que no se puede perder.
+      if (/invalid api key|revoked|inactive/i.test(apiMessage)) {
+        return (
+          `${apiMessage}\n\n` +
+          'El problema es la API key en sí, no el plan: puede estar mal copiada, ' +
+          'revocada o dada de baja. Se configura en la variable CRYPTOCAPI_API_KEY ' +
+          `del mcp.json del agente. Para sacar una nueva: ${TRIAL_URL}. Sin registro, ` +
+          'la key pública demo_btc_eth_public sirve Radar Alpha para bitcoin y ethereum.'
+        );
+      }
+
       return (
         `${apiMessage}\n\n` +
-        'La API key configurada no habilita esta herramienta. Si es la key pública de ' +
-        `demostración, los motores de cuantitativa no están incluidos: ${TRIAL_URL}`
+        'La API rechazó esta herramienta para la key configurada. No es un problema de ' +
+        `los argumentos, así que reintentar tal cual no cambia el resultado: ${TRIAL_URL}`
       );
 
     case 429: {

@@ -56,6 +56,54 @@ test('un producto desconocido no rompe el mensaje, se muestra tal cual', () => {
   assert.match(text, /motor_del_futuro/);
 });
 
+test('403 por pase vencido manda a renovar, no a comprar', () => {
+  const text = explainHttpError(
+    response(403, {
+      status: 'error',
+      message: "Your 'quant' pass is no longer active.",
+      code: 'PRODUCT_NOT_ACTIVE',
+      required_product: 'quant',
+      your_product: 'quant',
+    })
+  );
+  assert.match(text, /Quant Pro/);
+  assert.match(text, /renovar/);
+  // El punto entero de separar este código del de motor no incluido: a un
+  // cliente que pagó no se le puede decir que nunca compró el motor.
+  assert.ok(
+    !/no lo incluye|no incluye/.test(text),
+    'la key SÍ compró este motor; negarlo es falso y lo manda a comprar de nuevo'
+  );
+});
+
+test('403 de key inválida habla de la key, no de planes ni de motores', () => {
+  // La API devuelve esto como 403 y no como 401, así que cae en el fallback.
+  // Antes el fallback hablaba de motores de cuantitativa y el agente le decía
+  // al usuario "no tenés el plan" cuando la key estaba mal copiada.
+  for (const message of ['Invalid API Key', 'API Key is revoked or inactive']) {
+    const text = explainHttpError(response(403, { status: 'error', message }));
+    assert.match(text, /CRYPTOCAPI_API_KEY/);
+    // Descartar el plan explícitamente vale más que callarlo: el agente lo lee
+    // y deja de ofrecerle una compra a alguien que copió mal la key.
+    assert.match(text, /no el plan/);
+    assert.ok(
+      !/cuantitativa|no habilita esta herramienta/i.test(text),
+      `"${message}" no es un problema de motores: atribuirlo manda al usuario a comprar de gusto`
+    );
+  }
+});
+
+test('403 desconocido no inventa una causa', () => {
+  const text = explainHttpError(response(403, { status: 'error', message: 'Forbidden' }));
+  // Sin `code` y sin pistas en el texto, lo único honesto es decir que no se
+  // pudo y que reintentar igual no ayuda.
+  assert.match(text, /reintentar/i);
+  assert.ok(
+    !/cuantitativa/.test(text),
+    'no se puede atribuir a los motores de pago un 403 que no dijo por qué'
+  );
+});
+
 test('403 de moneda restringida habla de la moneda, no del plan', () => {
   const text = explainHttpError(
     response(403, {
