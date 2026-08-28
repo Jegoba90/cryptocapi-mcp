@@ -12,8 +12,17 @@ que es exactamente el riesgo que el plan quería evitar al elegir TypeScript
 sobre Go (§3.4).
 
 **Cómo se mitiga, y qué falta:** cada archivo declara de qué archivo fuente
-salió. Falta el chequeo automático que compare contra el origen; va en F3 junto
-al resto del CI. Hasta que exista, al tocar `shared/schemas` en el repo
-principal hay que venir a mirar acá.
+salió. **El chequeo automático sigue sin existir**: el plan lo daba por F3 y F3
+cerró sin él. Hasta que exista, al tocar `shared/schemas` o los códigos de error
+del backend hay que venir a mirar acá a mano.
 
 Sólo se copia lo que el paquete necesita para decidir, no el contrato entero.
+
+## Sincronizaciones hechas a mano
+
+| Fecha | Qué cambió en el origen | Qué se copió acá |
+| :--- | :--- | :--- |
+| 2026-08-28 | `ErrorDetails` de `backend/src/api/middlewares/error.ts` suma `PRODUCT_NOT_ACTIVE`, que las tres rutas de quant emiten cuando la key compró el motor y el pase venció | `PRODUCT_NOT_ACTIVE` en `KNOWN_ERROR_CODES`, más su rama de traducción en `../errors.ts` |
+
+Esta tabla es el sustituto pobre del chequeo automático: sirve para auditar la
+deriva hacia atrás, no para evitarla.

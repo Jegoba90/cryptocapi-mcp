@@ -93,6 +93,8 @@ git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
 
 El workflow comprueba primero que el tag coincida con la versión del `package.json`, porque **en npm una versión no se puede reusar** y ese error no se deshace. La autenticación es *trusted publishing* por OIDC, sin token: está atada al nombre de `release.yml`, así que renombrar ese archivo rompe la publicación.
 
+`npm version` es la única fuente de la versión: el servidor lee el `package.json` publicado para declarar su `serverInfo.version`, y un test del handshake falla si los dos números se separan. No hay ningún literal que actualizar a mano.
+
 ## Licencia
 
 MIT

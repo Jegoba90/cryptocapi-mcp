@@ -90,6 +90,18 @@ Con la demo key: **«dame la señal cuantitativa de BTCUSDT»**
 
 Esperado: el error nombra el motor que hace falta (**Quant Pro**), no un «PRO» genérico. Con una key de pago, el mensaje además dice qué pase sí tenés.
 
+Probá también **«escaneá el mercado»** y **«dame las señales de bitcoin y ethereum»**: tienen que nombrar **Market Scan** y **Quant Plus** respectivamente. Son tres pases que se venden por separado, así que tres mensajes distintos.
+
+> **Este check falló la primera vez que se corrió, el 2026-08-28.** Las tres rutas devolvían el mismo texto —«Quantitative signals require a PRO plan subscription»— sin `code` ni `required_product`, así que el MCP no tenía con qué nombrar el motor. Se arregló en el backend, no en el paquete. Si vuelve a fallar, mirá primero si la API está emitiendo el código: `curl -i -H "x-api-key: demo_btc_eth_public" https://api.cryptocapi.com/v1/quant/BTCUSDT/signal` tiene que traer `"code":"PRODUCT_NOT_INCLUDED"`.
+
+### 7 bis. Un pase que compraste y se venció
+
+Necesita una key de pago **vencida**, así que va con las de bloque 4 si la tenés a mano.
+
+Esperado: el error dice que el pase **venció** y que hay que **renovarlo**. Lo que no puede decir, bajo ninguna forma, es que la key «no incluye» el motor: lo compró. Ese texto manda a un cliente que pagó a comprar de nuevo algo que ya tiene.
+
+Es el caso `PRODUCT_NOT_ACTIVE`, y existe justamente para no confundirlo con el 7.
+
 ### 8. Que el agente no gaste intentos
 
 Después del 6 y el 7, preguntá: **«¿qué de todo esto no pudiste hacer y por qué?»**
@@ -121,6 +133,14 @@ Esperado: el agente usa el formato correcto en cada una **sin que se lo aclares*
 Configurá el MCP con una key inventada (`sk_live_loquesea.malformada`) y pedile cualquier cosa.
 
 El mensaje de error **no puede contener la key, ni siquiera el prefijo**. Hay un test automático que lo cubre, y este check confirma lo mismo de punta a punta contra la API real.
+
+Aprovechá y mirá **qué** dice, no solo qué no dice: tiene que señalar la key, no un plan. La API devuelve este caso como `403` en vez de `401`, así que hasta el 2026-08-28 el mensaje hablaba de motores de pago y mandaba a comprar a alguien que solo había copiado mal la key.
+
+### 11 bis. La versión que declara el servidor
+
+En el handshake, `serverInfo.version` tiene que coincidir con la versión publicada del paquete.
+
+La 0.1.0 salió declarando `0.0.0`, y eso vuelve inútil cualquier reporte de bug: el cliente muestra una versión que no existe. Se ve en la primera respuesta del check 2.
 
 ### 12. El sello sobrevive el viaje
 
