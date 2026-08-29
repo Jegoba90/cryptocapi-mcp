@@ -135,7 +135,12 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'es de acceso libre. La vista "alpha" trae el análisis profundo con el audit_trail ' +
         'y su protocol_hash, que es el sello del cálculo, y requiere el pase Radar Alpha ' +
         '(o Quant Plus si se pide engine="quant_plus"). Con la key pública de demostración, ' +
-        'alpha funciona solo para bitcoin y ethereum.',
+        'alpha funciona solo para bitcoin y ethereum. ' +
+        'Al leer la respuesta: `z_score` mide el MOVIMIENTO de hoy contra los movimientos ' +
+        'pasados, y la posición en Bandas de Bollinger mide el NIVEL de precio contra su ' +
+        'rango. Son ejes distintos: precio en el tercio superior con z_score negativo no es ' +
+        'una contradicción, es un nivel alto que hoy cayó fuerte. No las mezcles en una sola ' +
+        'frase.',
       inputSchema: {
         coin_id: z
           .string()
