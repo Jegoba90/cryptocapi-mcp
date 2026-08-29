@@ -90,8 +90,10 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
     {
       title: 'Precios más recientes',
       description:
-        'Últimos precios registrados de los activos que sigue CryptoCapi. Endpoint público: ' +
-        'no requiere plan ni API key.',
+        'Últimos precios registrados de los activos que sigue CryptoCapi, ordenados por ' +
+        'capitalización. Endpoint público: no requiere plan ni API key. Ojo: sin `limit` ' +
+        'NO llega el universo entero, sino los primeros de la lista. Para saber cuántos ' +
+        'activos se siguen hay que pedir un límite alto y contar lo que vuelve.',
       inputSchema: {
         limit: z
           .number()
@@ -99,7 +101,10 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
           .min(1)
           .max(250)
           .optional()
-          .describe('Cuántos activos devolver. Por defecto los devuelve todos.'),
+          .describe(
+            'Cuántos activos devolver. Omitirlo NO los trae todos: la API responde con 50. ' +
+              'Pedir 250 para el universo completo.'
+          ),
       },
     },
     async ({ limit }) => respond(() => client.get('/market/prices/latest', { limit }, BUDGET_MS.lectura))
@@ -181,13 +186,18 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
       description:
         'Señales de Quant Plus para varios activos en una sola llamada. Requiere el pase ' +
         'Quant Plus. Ojo con el formato: acá van identificadores de moneda ("bitcoin"), ' +
-        'no pares de trading, al revés que en get_signal.',
+        'no pares de trading, al revés que en get_signal. Solo un universo curado tiene ' +
+        'señal, mucho más chico que el listado de precios: un activo fuera de él vuelve ' +
+        'con `available: false`, y eso es la respuesta correcta, no un error.',
       inputSchema: {
         symbols: z
           .array(z.string().min(1).max(20))
           .min(1)
           .max(50)
-          .describe('Identificadores de moneda, de 1 a 50: ["bitcoin", "ethereum"].'),
+          .describe(
+            'Identificadores de moneda, de 1 a 50: ["bitcoin", "ethereum"]. El tope de 50 ' +
+              'es del pedido, no de las señales disponibles.'
+          ),
       },
     },
     async ({ symbols }) => respond(() => client.post('/quant/batch', { symbols }, BUDGET_MS.motorPesado))
@@ -200,7 +210,9 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
       description:
         'Recorre el mercado y devuelve los activos mejor rankeados según una estrategia. ' +
         'Requiere el pase Market Scan, que se vende aparte de Quant Plus aunque el ranking ' +
-        'se arme sobre sus señales.',
+        'se arme sobre sus señales. El ranking cubre el universo curado de Quant Plus, ' +
+        'mucho más chico que el listado de precios, así que pedir 50 puede devolver ' +
+        'bastante menos. Eso no es un fallo.',
       inputSchema: {
         strategy: z
           .enum(['balanced', 'aggressive', 'conservative'])
@@ -212,7 +224,10 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
           .min(1)
           .max(50)
           .optional()
-          .describe('Cuántos activos devolver, de 1 a 50. Por defecto 10.'),
+          .describe(
+            'Cuántos activos devolver, de 1 a 50. Por defecto 10. Es un techo del pedido: ' +
+              'si el universo rankeado es menor, vuelven menos.'
+          ),
       },
     },
     async ({ strategy, limit }) =>
