@@ -106,7 +106,11 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'pasados, y la posición en Bandas de Bollinger mide el NIVEL de precio contra su ' +
         'rango. Son ejes distintos: precio en el tercio superior con z_score negativo no es ' +
         'una contradicción, es un nivel alto que hoy cayó fuerte. No las mezcles en una sola ' +
-        'frase.',
+        'frase. ' +
+        'Si la moneda todavía no tiene análisis, la respuesta es ' +
+        '`{"status":"success","data":null}`: no es un error ni un fallo de la ' +
+        'consulta, es que ningún motor calculó nada para ese activo. Decilo así, ' +
+        '«no hay análisis disponible», y no completes el hueco por tu cuenta.',
       inputSchema: {
         coin_id: z
           .string()
