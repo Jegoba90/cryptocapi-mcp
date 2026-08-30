@@ -33,7 +33,25 @@ La configuración por defecto usa la key pública de demostración. No hace falt
 }
 ```
 
-**Qué alcanza con la demo key, dicho de frente:** `get_insight` responde sin restricción en su vista `pulse`, y con `view="alpha"`, que es donde se ve el sello, funciona **sólo para bitcoin y ethereum**. Las tres de cuantitativa quedan fuera. O sea que en la primera sesión responde una de cuatro, y el gancho real, el sello, se ve en Bitcoin.
+La `env` es opcional: **sin ninguna variable el paquete cae solo en la key pública de demostración**, así que alcanza con `command` y `args`.
+
+**Qué alcanza con la demo key, medido el 2026-08-30 contra la versión publicada:**
+
+| Motor | Herramienta | Con la demo key |
+|---|---|---|
+| Radar | `get_insight` | ✅ **solo bitcoin y ethereum**, `pulse` y `alpha` con sello |
+| Quant Plus | `get_insight?engine=quant_plus` | ✅ **solo bitcoin y ethereum**, sello reproducible con `input_vector` |
+| Quant Plus | `batch_signals` | ❌ cerrado, para cualquier moneda |
+| Quant Pro | `get_signal` | ❌ cerrado, para cualquier par |
+| Market Scan | `scan_market` | ❌ cerrado, para cualquier estrategia |
+
+Las tres cerradas **no fallan por la moneda, fallan siempre**: `get_signal` con `BTCUSDT`, que es el par de Bitcoin, también devuelve 403. La restricción a bitcoin y ethereum aplica a `get_insight` y nada más.
+
+O sea que en la primera sesión responde **una de las cuatro herramientas**, y es la que muestra el producto: el análisis firmado, sobre Bitcoin, con los dos motores que lo firman.
+
+> **Una rareza conocida, y está sin resolver:** Quant Plus contesta por `get_insight?engine=quant_plus` y se cierra por `batch_signals`, que es el mismo motor. Son dos decisiones deliberadas que se cruzan (el plan `demo` tiene acceso completo por producto, y las rutas quant lo rechazan por plan), pero para un agente el efecto es contradictorio.
+
+**Para probar los cuatro motores sin límite de moneda** hace falta el trial de 14 días, gratis, en https://cryptocapi.com. Esa key abre todo mientras dura.
 
 ## Qué lo diferencia
 

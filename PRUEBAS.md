@@ -56,11 +56,11 @@ Tres respuestas JSON, la última con las cuatro herramientas. Sirve para separar
 
 ## Bloque 2 — Lo que anda sin pagar nada
 
-### 3. Las tres públicas
+### 3. Lo que la demo key abre, y lo que no
 
-**«dame el resumen de mercado»**, **«los últimos precios»**, **«los indicadores macro»**.
+El detalle está en la tabla del [README](./README.md#probarlo-sin-registrarte), medida el 2026-08-30 contra la versión publicada. En una línea: **de las cuatro herramientas responde una**, `get_insight`, y solo para bitcoin y ethereum. Las otras tres están cerradas para cualquier entrada, no solo fuera de esas dos monedas.
 
-Las tres responden con la demo key. Si alguna da 401 o 403, el problema es de la API o de la key, no del MCP.
+> **Este check cambió el 2026-08-30.** Antes se llamaba «las tres públicas» y pedía resumen de mercado, precios y macro. Esas tres herramientas se retiraron: devolvían dato de terceros. Si tu agente todavía las ofrece, está corriendo una versión anterior a la `0.2.0`.
 
 ### 4. El insight básico
 
