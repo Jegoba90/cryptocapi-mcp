@@ -52,8 +52,6 @@ Las tres cerradas **no fallan por la moneda, fallan siempre**: `get_signal` con 
 
 O sea que en la primera sesión responde **una de las cuatro herramientas**, y es la que muestra el producto: el análisis firmado, sobre Bitcoin, con los dos motores que lo firman.
 
-> **Una rareza conocida, y está sin resolver:** Quant Plus contesta por `get_insight?engine=quant_plus` y se cierra por `batch_signals`, que es el mismo motor. Son dos decisiones deliberadas que se cruzan (el plan `demo` tiene acceso completo por producto, y las rutas quant lo rechazan por plan), pero para un agente el efecto es contradictorio.
-
 **Para probar los cuatro motores sin límite de moneda** hace falta el trial de 14 días, gratis, en https://cryptocapi.com. Esa key abre todo mientras dura.
 
 ## Qué lo diferencia
