@@ -2,16 +2,19 @@
 
 Servidor MCP de **CryptoCapi**: análisis de mercado cripto con sello verificable, expuesto como herramientas nativas para agentes.
 
-## Las cuatro herramientas
+## Cuatro herramientas, cuatro motores
 
-| Herramienta | Qué devuelve | Qué requiere |
-|---|---|---|
-| `get_insight` | Análisis de un activo. La vista `alpha` trae el sello | `pulse` libre · `alpha` requiere pase |
-| `batch_signals` | Señales de varios activos en una llamada | Pase **Quant Plus** |
-| `get_signal` | Señal cuantitativa de un par de trading | Pase **Quant Pro** |
-| `scan_market` | Ranking del mercado según una estrategia | Pase **Market Scan** |
+| Herramienta | Motor | Qué devuelve | Qué requiere |
+|---|---|---|---|
+| `get_insight` | **Radar** | Análisis de un activo. La vista `alpha` trae el sello | `pulse` libre · `alpha` requiere pase **Radar Alpha** |
+| `get_insight` con `engine="quant_plus"` | **Quant Plus** | El mismo activo firmado por el motor determinista, con sello `reproducible` | Pase **Quant Plus** |
+| `batch_signals` | **Quant Plus** | Señales de varios activos en una llamada | Pase **Quant Plus** |
+| `get_signal` | **Quant Pro** | Señal cuantitativa de un par de trading | Pase **Quant Pro** |
+| `scan_market` | **Market Scan** | Ranking del mercado según una estrategia | Pase **Market Scan** |
 
-**Las cuatro son motores de CryptoCapi.** Hasta el 2026-08-30 había tres más (`get_market_summary`, `get_prices`, `get_macro`) que devolvían dato de terceros: capitalización y miedo y codicia, precios de CoinGecko y series macro de FRED. Se retiraron porque CryptoCapi no es un agregador: sus motores firman inteligencia derivada y el dato ajeno es insumo interno. Un agente que preguntaba «¿cómo está el mercado?» agarraba el resumen y se iba con dato de terceros sin tocar un motor. Esos endpoints siguen existiendo en la API REST; lo que se retiró es que el agente los vea como herramientas.
+Son cinco filas para cuatro herramientas porque **`get_insight` es la puerta de dos motores**, y cada uno pide su propio pase. Tener Radar Alpha no abre Quant Plus por ese mismo tool: cambia el parámetro `engine` y cambia el pase que se exige.
+
+**Hasta el 2026-08-30 había tres herramientas más** (`get_market_summary`, `get_prices`, `get_macro`) que devolvían dato de terceros: capitalización y miedo y codicia, precios de CoinGecko y series macro de FRED. Se retiraron porque CryptoCapi no es un agregador: sus motores firman inteligencia derivada y el dato ajeno es insumo interno. Un agente que preguntaba «¿cómo está el mercado?» agarraba el resumen y se iba con dato de terceros sin tocar un motor. Esos endpoints siguen existiendo en la API REST; lo que se retiró es que el agente los vea como herramientas.
 
 **Cada motor se compra por separado, así que tener uno no habilita los otros.** Las descripciones nombran el motor que hace falta, no un «PRO» genérico, para que el agente no gaste intentos en herramientas que su clave no abre. Cuando igual las intenta, el error le dice qué pase falta y cuál sí tiene, en vez de un 403 pelado.
 
