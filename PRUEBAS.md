@@ -32,11 +32,11 @@ Igual, cambiando `CRYPTOCAPI_API_KEY` por la tuya. Necesaria para los checks **9
 
 ## Bloque 1 — Que el servidor exista
 
-### 1. Las siete herramientas aparecen
+### 1. Las cuatro herramientas aparecen
 
 Preguntale al agente: **«¿qué herramientas de CryptoCapi tenés disponibles?»**
 
-Tienen que salir las siete: `get_market_summary`, `get_prices`, `get_macro`, `get_insight`, `get_signal`, `batch_signals`, `scan_market`.
+Tienen que salir las cuatro, y solo esas cuatro: `get_insight`, `batch_signals`, `get_signal`, `scan_market`. Todas son motores de CryptoCapi. Si aparecen `get_market_summary`, `get_prices` o `get_macro`, el agente está corriendo una versión anterior al 2026-08-30: esas tres devolvían dato de terceros y se retiraron.
 
 *Si no aparece ninguna:* no es la API, es el arranque. Ver el check 11.
 
@@ -50,7 +50,7 @@ printf '%s\n' \
   | npx -y @cryptocapi/mcp 2>/dev/null
 ```
 
-Tres respuestas JSON, la última con las siete herramientas. Sirve para separar un problema del paquete de uno de la configuración del agente.
+Tres respuestas JSON, la última con las cuatro herramientas. Sirve para separar un problema del paquete de uno de la configuración del agente.
 
 ---
 

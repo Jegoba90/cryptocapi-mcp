@@ -68,59 +68,22 @@ async function respond(call: () => Promise<ApiResponse>): Promise<CallToolResult
 
 export function registerTools(server: McpServer, client: CryptoCapiClient): void {
   // ---------------------------------------------------------------------------
-  // Públicos: responden sin API key. Son los que hacen que la primera sesión no
-  // sea una pared (§5).
+  // Acá vivían `get_market_summary`, `get_prices` y `get_macro`, retirados el
+  // 2026-08-30. Devolvían dato de terceros: capitalización y miedo y codicia,
+  // precios de CoinGecko, y series macro de FRED. CryptoCapi no es un agregador:
+  // sus motores firman inteligencia derivada y el dato ajeno es insumo interno.
+  // Con siete herramientas, un agente que preguntaba «¿cómo está el mercado?»
+  // agarraba `get_market_summary` y se iba con dato de terceros sin tocar un
+  // motor. Con cuatro, todas llevan a lo que el producto vende.
+  //
+  // El argumento para tenerlos era que la primera sesión sin API key no fuera
+  // una pared. Ese argumento sigue cubierto sin ellos: `get_insight` en vista
+  // `pulse` responde sin credencial, y es una puerta mejor, porque lo que
+  // devuelve es un motor propio y no el precio de CoinGecko.
+  //
+  // Los endpoints siguen existiendo en la API REST para el front y para quien
+  // los integre; lo que se retira es que el agente los vea como herramientas.
   // ---------------------------------------------------------------------------
-
-  server.registerTool(
-    'get_market_summary',
-    {
-      title: 'Resumen de mercado',
-      description:
-        'Resumen del mercado cripto: capitalización total, volumen de 24 horas, dominancia ' +
-        'de Bitcoin y Ethereum e índice de miedo y codicia. Endpoint público: no requiere ' +
-        'plan ni API key.',
-      inputSchema: {},
-    },
-    async () => respond(() => client.get('/market/market-summary', undefined, BUDGET_MS.lectura))
-  );
-
-  server.registerTool(
-    'get_prices',
-    {
-      title: 'Precios más recientes',
-      description:
-        'Últimos precios registrados de los activos que sigue CryptoCapi, ordenados por ' +
-        'capitalización. Endpoint público: no requiere plan ni API key. Ojo: sin `limit` ' +
-        'NO llega el universo entero, sino los primeros de la lista. Para saber cuántos ' +
-        'activos se siguen hay que pedir un límite alto y contar lo que vuelve.',
-      inputSchema: {
-        limit: z
-          .number()
-          .int()
-          .min(1)
-          .max(250)
-          .optional()
-          .describe(
-            'Cuántos activos devolver. Omitirlo NO los trae todos: la API responde con 50. ' +
-              'Pedir 250 para el universo completo.'
-          ),
-      },
-    },
-    async ({ limit }) => respond(() => client.get('/market/prices/latest', { limit }, BUDGET_MS.lectura))
-  );
-
-  server.registerTool(
-    'get_macro',
-    {
-      title: 'Indicadores macroeconómicos',
-      description:
-        'Indicadores macro que el motor usa como contexto: inflación, tasas y series ' +
-        'relacionadas. Endpoint público: no requiere plan ni API key.',
-      inputSchema: {},
-    },
-    async () => respond(() => client.get('/market/macro', undefined, BUDGET_MS.lectura))
-  );
 
   // ---------------------------------------------------------------------------
   // Radar: la vista pulse es libre; alpha es la que trae el sello y exige pase.
@@ -192,8 +155,9 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'Señales de Quant Plus para varios activos en una sola llamada. Requiere el pase ' +
         'Quant Plus. Ojo con el formato: acá van identificadores de moneda ("bitcoin"), ' +
         'no pares de trading, al revés que en get_signal. Solo un universo curado tiene ' +
-        'señal, mucho más chico que el listado de precios: un activo fuera de él vuelve ' +
-        'con `available: false`, y eso es la respuesta correcta, no un error.',
+        'señal, bastante más chico que el conjunto de activos que CryptoCapi sigue: un ' +
+        'activo fuera de él vuelve con `available: false`, y eso es la respuesta ' +
+        'correcta, no un error.',
       inputSchema: {
         symbols: z
           .array(z.string().min(1).max(20))
@@ -216,8 +180,8 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'Recorre el mercado y devuelve los activos mejor rankeados según una estrategia. ' +
         'Requiere el pase Market Scan, que se vende aparte de Quant Plus aunque el ranking ' +
         'se arme sobre sus señales. El ranking cubre el universo curado de Quant Plus, ' +
-        'mucho más chico que el listado de precios, así que pedir 50 puede devolver ' +
-        'bastante menos. Eso no es un fallo.',
+        'bastante más chico que el conjunto de activos que CryptoCapi sigue, así que ' +
+        'pedir 50 puede devolver bastante menos. Eso no es un fallo.',
       inputSchema: {
         strategy: z
           .enum(['balanced', 'aggressive', 'conservative'])

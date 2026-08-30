@@ -36,7 +36,7 @@ const HANDSHAKE = [
     jsonrpc: '2.0',
     id: 3,
     method: 'tools/call',
-    params: { name: 'get_market_summary', arguments: {} },
+    params: { name: 'get_insight', arguments: { coin_id: 'bitcoin' } },
   },
 ];
 

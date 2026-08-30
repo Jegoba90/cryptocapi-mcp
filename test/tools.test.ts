@@ -64,20 +64,15 @@ function textOf(result: unknown): string {
   return first.text ?? '';
 }
 
-test('expone exactamente los siete tools de la superficie', async () => {
+test('expone exactamente los cuatro motores, y nada más', async () => {
+  // Las siete de antes incluían get_market_summary, get_prices y get_macro, que
+  // devolvían dato de terceros. Se retiraron el 2026-08-30: si alguien las
+  // reintroduce, esto se pone rojo. Ver el comentario en src/tools.ts.
   const { client, close } = await withServer({});
   try {
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name).sort();
-    assert.deepEqual(names, [
-      'batch_signals',
-      'get_insight',
-      'get_macro',
-      'get_market_summary',
-      'get_prices',
-      'get_signal',
-      'scan_market',
-    ]);
+    assert.deepEqual(names, ['batch_signals', 'get_insight', 'get_signal', 'scan_market']);
   } finally {
     await close();
   }
@@ -137,10 +132,10 @@ test('el protocol_hash de la salida es el mismo que dio la API', async () => {
 
 test('la API key viaja por header y nunca en la URL', async () => {
   const { client, api, close } = await withServer({
-    '/v1/market/market-summary': { status: 200, body: '{"ok":true}' },
+    '/v1/market/insights/bitcoin': { status: 200, body: '{"ok":true}' },
   });
   try {
-    await client.callTool({ name: 'get_market_summary', arguments: {} });
+    await client.callTool({ name: 'get_insight', arguments: { coin_id: 'bitcoin' } });
     const request = api.received[0];
     assert.ok(request, 'la API falsa tiene que haber recibido algo');
     assert.equal(request.apiKey, 'sk_test_fake');
