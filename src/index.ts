@@ -5,7 +5,7 @@
  * Corre en la máquina del usuario vía `npx @cryptocapi/mcp`. La API key vive en
  * el `mcp.json` del usuario y nunca en un servidor nuestro (plan §3.1).
  *
- * F2: los siete tools de §4.1 estan registrados. Este archivo solo arma las
+ * Los cuatro tools de la superficie estan registrados. Este archivo solo arma las
  * piezas y abre el transporte; la superficie vive en `tools.ts`.
  */
 import { readFileSync } from 'node:fs';

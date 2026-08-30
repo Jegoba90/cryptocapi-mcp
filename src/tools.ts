@@ -1,5 +1,8 @@
 /**
- * Los siete tools de la superficie MCP (plan §4.1).
+ * Los cuatro tools de la superficie MCP: uno por motor.
+ *
+ * Eran siete hasta el 2026-08-30. Los tres retirados devolvían dato de terceros
+ * y el motivo está escrito en `registerTools`, donde vivían.
  *
  * Tres decisiones de diseño que atraviesan todo el archivo:
  *

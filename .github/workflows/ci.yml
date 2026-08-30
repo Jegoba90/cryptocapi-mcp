@@ -66,9 +66,17 @@ jobs:
               if (m.jsonrpc !== '2.0') throw new Error('stdout con contenido que no es protocolo');
             }
             const lista = lineas.map(l => JSON.parse(l)).find(m => m.id === 2);
-            const total = lista.result.tools.length;
-            if (total !== 7) throw new Error('se esperaban 7 tools y hay ' + total);
-            console.log('handshake OK, 7 tools');
+            const nombres = lista.result.tools.map(t => t.name).sort().join(',');
+            // Se compara la lista y no el conteo: un conteo correcto con el
+            // conjunto equivocado pasaría igual. Las tres que faltan
+            // (get_market_summary, get_prices, get_macro) se retiraron el
+            // 2026-08-30 por devolver dato de terceros; si alguna vuelve, acá
+            // se ve. Ver el comentario en src/tools.ts.
+            const esperado = 'batch_signals,get_insight,get_signal,scan_market';
+            if (nombres !== esperado) {
+              throw new Error('la superficie cambió. Esperado: ' + esperado + ' — Recibido: ' + nombres);
+            }
+            console.log('handshake OK, los cuatro motores');
           "
 
   dependencias:
