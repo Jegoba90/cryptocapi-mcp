@@ -199,3 +199,48 @@ test('ningún mensaje de error filtra la API key', () => {
     assert.ok(!texto.includes('sk_live_'), 'ni siquiera el prefijo de una key');
   }
 });
+
+/**
+ * El `code` viaja en el texto (§3.15 de CORRECCIONES_ABIERTAS).
+ *
+ * `llms.txt` le dice al agente «branch on `code`, not on the prose». Por el
+ * camino REST el código está plano en el cuerpo; por MCP, hasta la 0.2.0, no
+ * estaba en ninguna parte: el cliente lo leía para elegir la explicación y
+ * después lo descartaba, así que la instrucción del manifiesto era imposible de
+ * cumplir desde un agente MCP. La prosa se puede reescribir sin aviso; el código
+ * es el contrato.
+ */
+test('cada 403 con código lo publica al final, para que el agente ramifique', () => {
+  const casos = [
+    { code: 'PRODUCT_NOT_INCLUDED', required_product: 'quant_plus' },
+    { code: 'PRODUCT_NOT_ACTIVE', required_product: 'quant', your_product: 'quant' },
+    { code: 'DEMO_COIN_RESTRICTED' },
+  ];
+  for (const caso of casos) {
+    const text = explainHttpError(response(403, { status: 'error', message: 'x', ...caso }));
+    assert.match(text, new RegExp(`code: ${caso.code}$`), `falta el code en ${caso.code}`);
+  }
+});
+
+// El código se agrega, no reemplaza: la explicación en prosa es lo que el agente
+// le muestra a la persona, y perderla para ganar un token sería un mal negocio.
+test('el código se suma a la explicación, no la reemplaza', () => {
+  const text = explainHttpError(
+    response(403, {
+      status: 'error',
+      message: 'no incluido',
+      code: 'PRODUCT_NOT_INCLUDED',
+      required_product: 'market_scan',
+    })
+  );
+  assert.match(text, /Market Scan/);
+  assert.match(text, /No reintentes/);
+  assert.match(text, /code: PRODUCT_NOT_INCLUDED$/);
+});
+
+// Un 403 sin código no debe inventarse uno: si la API no lo mandó, el agente
+// tiene que ver que no lo hay, no un `code: undefined` que parezca un valor.
+test('un error sin código no inventa la línea', () => {
+  const text = explainHttpError(response(403, { status: 'error', message: 'Forbidden' }));
+  assert.doesNotMatch(text, /code:/);
+});

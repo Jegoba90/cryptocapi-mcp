@@ -69,10 +69,23 @@ function normalizeErrorBody(data: unknown): ApiErrorBody | undefined {
 /**
  * Convierte una respuesta de error en un texto que el agente pueda usar para
  * decidir, no para adivinar.
+ *
+ * El texto termina con el `code` de la API cuando lo hay. `llms.txt` le indica
+ * al agente «branch on `code`, not on the prose», y hasta la 0.2.0 por este
+ * camino no había ningún `code`: el cliente lo leía para elegir la explicación y
+ * después lo tiraba, así que la instrucción del manifiesto no se podía cumplir
+ * desde MCP. La prosa se puede reescribir; el código no cambia, y es lo único
+ * que un agente puede comparar sin adivinar.
  */
 export function explainHttpError(response: ApiResponse): string {
   const body = normalizeErrorBody(response.data);
+  const text = describeHttpError(response, body);
+  return body?.code ? `${text}\n\ncode: ${body.code}` : text;
+}
+
+function describeHttpError(response: ApiResponse, body: ApiErrorBody | undefined): string {
   const apiMessage = body?.message ?? 'La API respondió un error.';
+
 
   switch (response.status) {
     case 401:
