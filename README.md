@@ -44,7 +44,7 @@ La `env` es opcional: **sin ninguna variable el paquete cae solo en la key públ
 |---|---|---|
 | Radar | `get_insight` | ✅ **solo bitcoin y ethereum**, `pulse` y `alpha` con sello |
 | Quant Plus | `get_insight?engine=quant_plus` | ✅ **solo bitcoin y ethereum**, sello reproducible con `input_vector` |
-| Quant Plus | `batch_signals` | ❌ cerrado, para cualquier moneda |
+| Quant Plus | `batch_signals` | ✅ **solo bitcoin y ethereum**, mismo alcance que `get_insight` |
 | Quant Pro | `get_signal` | ❌ cerrado, para cualquier par |
 | Market Scan | `scan_market` | ❌ cerrado, para cualquier estrategia |
 

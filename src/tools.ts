@@ -160,7 +160,9 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
       title: 'Señales de Quant Plus en lote',
       description:
         'Señales de Quant Plus para varios activos en una sola llamada. Requiere el pase ' +
-        'Quant Plus. Ojo con el formato: acá van identificadores de moneda ("bitcoin"), ' +
+        'Quant Plus, con una excepción: con la key pública de demostración funciona para ' +
+        'bitcoin y ethereum, igual que get_insight. Ojo con el formato: acá van ' +
+        'identificadores de moneda ("bitcoin"), ' +
         'no pares de trading, al revés que en get_signal. Solo un universo curado tiene ' +
         'señal, bastante más chico que el conjunto de activos que CryptoCapi sigue: un ' +
         'activo fuera de él vuelve con `available: false`, y eso es la respuesta ' +
