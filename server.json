@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Jegoba90/cryptocapi",
+  "description": "Análisis de riesgo cripto: cada insight PRO trae el SHA-256 de sus inputs para que lo recalcules.",
+  "repository": {
+    "url": "https://github.com/Jegoba90/cryptocapi-mcp",
+    "source": "github"
+  },
+  "version": "0.2.3",
+  "websiteUrl": "https://cryptocapi.com/docs/agentes",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@cryptocapi/mcp",
+      "version": "0.2.3",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "CRYPTOCAPI_API_KEY",
+          "description": "API key de CryptoCapi. Opcional: sin ella se usa la key pública de demostración demo_btc_eth_public, que sirve análisis de bitcoin y ethereum sin registro. Una key propia abre el resto del universo y los motores Quant Pro y Market Scan.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string",
+          "default": "demo_btc_eth_public"
+        }
+      ]
+    }
+  ]
+}
