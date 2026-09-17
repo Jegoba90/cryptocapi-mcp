@@ -1,6 +1,33 @@
 # @cryptocapi/mcp
 
-Servidor MCP de **CryptoCapi**: análisis de mercado cripto con sello verificable, expuesto como herramientas nativas para agentes.
+[![npm](https://img.shields.io/npm/v/@cryptocapi/mcp)](https://www.npmjs.com/package/@cryptocapi/mcp)
+[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.Jegoba90%2Fcryptocapi-blue)](https://registry.modelcontextprotocol.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+Análisis de mercado cripto **con sello verificable**, como herramientas nativas
+para cualquier agente que hable MCP. Cada respuesta viaja con el SHA-256 de sus
+inputs, así que el análisis se puede **recalcular y comprobar** — no hay que
+creerle al modelo.
+
+## Pegá esto y ya funciona
+
+Sin cuenta, sin registrarte, sin clave. Va en el archivo de configuración de tu
+cliente MCP:
+
+```json
+{
+  "mcpServers": {
+    "cryptocapi": {
+      "command": "npx",
+      "args": ["-y", "@cryptocapi/mcp"]
+    }
+  }
+}
+```
+
+Con eso ya podés preguntarle a tu agente por Bitcoin o Ethereum y recibir el
+análisis firmado por los dos motores que lo firman. El detalle de hasta dónde
+llega la demo está [más abajo](#probarlo-sin-registrarte).
 
 ## Cuatro herramientas, cuatro motores
 
