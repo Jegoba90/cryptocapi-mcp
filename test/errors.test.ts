@@ -176,9 +176,19 @@ test('5xx aclara que no es culpa de la key ni de los argumentos', () => {
   assert.match(text, /No es un problema de la key/);
 });
 
-test('el timeout apunta a la variable que lo controla', () => {
-  const text = explainRequestError(new ApiRequestError('tardó demasiado', 'timeout'));
+test('el timeout apunta a la variable, y avisa que REEMPLAZA en vez de sumarse', () => {
+  // El mensaje llega con el presupuesto que de verdad cortó (ver http.test.ts).
+  const text = explainRequestError(
+    new ApiRequestError('La API de CryptoCapi no respondió en 45000 ms.', 'timeout')
+  );
   assert.match(text, /CRYPTOCAPI_TIMEOUT_MS/);
+  assert.match(text, /45000 ms/, "el consejo no sirve sin el número contra el que compararse");
+
+  // Sin este aviso el consejo se vuelve en contra: la variable pisa el
+  // presupuesto de las cuatro herramientas, así que quien lee "45000 ms" y pone
+  // 30000 creyendo que amplía, en realidad recorta.
+  assert.match(text, /REEMPLAZA/);
+  assert.match(text, /por encima/);
 });
 
 test('ningún mensaje de error filtra la API key', () => {

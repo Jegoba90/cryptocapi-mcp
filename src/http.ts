@@ -141,8 +141,18 @@ export class CryptoCapiClient {
       return { status: response.status, raw, data, headers: responseHeaders };
     } catch (error: unknown) {
       if (error instanceof Error && error.name === 'AbortError') {
+        // `budget` y NO `config.timeoutMs`: son distintos siempre que el tool traiga
+        // su propio presupuesto, que es en los cuatro. Hasta la 0.2.3 acá iba el
+        // default, así que un `scan_market` que cortaba a los 45 000 ms informaba
+        // 15 000.
+        //
+        // El daño no era el número en sí. `explainRequestError` invita a ampliar con
+        // CRYPTOCAPI_TIMEOUT_MS, y esa variable REEMPLAZA el presupuesto de todas las
+        // herramientas: quien leía 15 000 y ponía 30 000 creyendo que duplicaba, en
+        // realidad recortaba el presupuesto real de 45 000. El consejo se volvía en
+        // contra de quien lo seguía.
         throw new ApiRequestError(
-          `La API de CryptoCapi no respondió en ${this.config.timeoutMs} ms.`,
+          `La API de CryptoCapi no respondió en ${budget} ms.`,
           'timeout'
         );
       }

@@ -16,6 +16,19 @@ export interface FakeRoute {
   headers?: Record<string, string>;
 }
 
+/**
+ * Una ruta que acepta la request y no contesta NUNCA.
+ *
+ * Es la única forma de ejercitar el presupuesto de tiempo sin parchear `fetch`,
+ * que es justo lo que este helper existe para no hacer: el test tiene que pasar
+ * por el `AbortController` de verdad, porque ahí es donde estaba el fallo.
+ */
+export interface FakeHang {
+  hang: true;
+}
+
+export type FakeHandler = FakeRoute | FakeHang;
+
 export interface FakeApi {
   url: string;
   /** Requests recibidas, para comprobar qué mandó el cliente. */
@@ -23,7 +36,7 @@ export interface FakeApi {
   close: () => Promise<void>;
 }
 
-export async function startFakeApi(routes: Record<string, FakeRoute>): Promise<FakeApi> {
+export async function startFakeApi(routes: Record<string, FakeHandler>): Promise<FakeApi> {
   const received: FakeApi['received'] = [];
 
   const server: Server = createServer((req, res) => {
@@ -45,6 +58,10 @@ export async function startFakeApi(routes: Record<string, FakeRoute>): Promise<F
         res.end(JSON.stringify({ status: 'error', message: `ruta no simulada: ${path}` }));
         return;
       }
+      // Se queda con el socket abierto a propósito: el cliente tiene que cortar
+      // solo, por su propio presupuesto, y ese corte es lo que se está probando.
+      if ('hang' in route) return;
+
       res.writeHead(route.status, { 'content-type': 'application/json', ...route.headers });
       res.end(route.body);
     });
@@ -56,6 +73,13 @@ export async function startFakeApi(routes: Record<string, FakeRoute>): Promise<F
   return {
     url: `http://127.0.0.1:${port}`,
     received,
-    close: () => new Promise<void>((resolve) => server.close(() => resolve())),
+    close: () =>
+      new Promise<void>((resolve) => {
+        // `close()` espera a que las conexiones vivas terminen, y una ruta `hang`
+        // deja justamente eso. Sin cerrarlas a mano, el test que prueba el timeout
+        // cuelga al runner en vez de terminar.
+        server.closeAllConnections();
+        server.close(() => resolve());
+      }),
   };
 }
