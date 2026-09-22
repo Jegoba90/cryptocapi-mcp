@@ -29,6 +29,60 @@ function label(product: string | undefined): string {
 }
 
 /**
+ * El texto humano del error, venga como `message` o como `error`.
+ *
+ * Dos nombres para lo mismo: el backend manda `message`, y los proxies que
+ * reescriben el cuerpo suelen mandar `error`. Leer los dos evita perder la única
+ * frase que el agente le puede mostrar a la persona.
+ */
+function messageOf(body: ApiErrorBody | undefined): string | undefined {
+  return body?.message ?? body?.error;
+}
+
+/**
+ * Cuánto esperar, a partir del header `Retry-After`.
+ *
+ * RFC 9110 admite DOS formas: segundos de espera, o una fecha HTTP. Hasta la
+ * 0.2.3 acá se concatenaba el header crudo con la palabra «segundos», así que la
+ * forma fecha producía «Esperá Wed, 21 Oct 2026 07:28:00 GMT segundos». El agente
+ * se quedaba sin número contra el cual esperar, y sin número lo más probable es
+ * que reintente: exactamente el bucle que este mensaje existe para cortar.
+ *
+ * La fecha es la forma que usan los gateways que suelen ir delante de una API,
+ * así que no es un caso de laboratorio.
+ */
+function esperaLegible(retryAfter: string | undefined): string {
+  const crudo = retryAfter?.trim();
+  if (!crudo) return 'un momento';
+
+  // Forma 1: segundos. Se validan como dígitos y no con `Number` a secas, que
+  // acepta «0x10» y contesta 16, o «1e3» y contesta 1000: ninguno de los dos es
+  // un Retry-After válido, y confundirlos manda al agente a esperar cualquier
+  // cosa. El decimal se tolera porque redondear hacia arriba es más útil que
+  // descartarlo, aunque el RFC pida enteros.
+  if (/^\d+(\.\d+)?$/.test(crudo)) {
+    const segundos = Math.ceil(Number(crudo));
+    // Un 0 significa «ya podés reintentar», pero el texto que envuelve esto
+    // desaconseja el bucle: «0 segundos» se contradice con esa frase. Y es el
+    // mismo significado que una fecha ya pasada, así que da la misma salida:
+    // dos caminos para lo mismo no pueden contestar distinto.
+    return segundos > 0 ? `${segundos} segundos` : 'un momento';
+  }
+
+  // Forma 2: fecha HTTP. Se convierte a segundos para que el agente tenga el
+  // mismo tipo de dato en los dos casos y no tenga que parsear una fecha.
+  const instante = Date.parse(crudo);
+  if (!Number.isNaN(instante)) {
+    const faltan = Math.ceil((instante - Date.now()) / 1000);
+    // Una fecha ya pasada no puede volverse una espera negativa.
+    return faltan > 0 ? `${faltan} segundos` : 'un momento';
+  }
+
+  // Un header que no es ninguna de las dos formas: mejor vago que inventado.
+  return 'un momento';
+}
+
+/**
  * Normaliza el cuerpo de error, porque hay **dos formas en la calle**.
  *
  * El commit `e21dc4c2` hizo que `code`, `required_product` y `your_product`
@@ -54,14 +108,20 @@ function normalizeErrorBody(data: unknown): ApiErrorBody | undefined {
 
   // Forma vieja: `message` es el JSON del error. Un mensaje de texto normal no
   // parsea, así que intentarlo es inocuo.
-  try {
-    const nested: unknown = JSON.parse(body.message);
-    if (nested !== null && typeof nested === 'object') {
-      const reparsed = ApiErrorBodySchema.safeParse({ status: 'error', ...nested });
-      if (reparsed.success && reparsed.data.code) return reparsed.data;
+  const crudo = messageOf(body);
+  if (crudo !== undefined) {
+    try {
+      const nested: unknown = JSON.parse(crudo);
+      if (nested !== null && typeof nested === 'object') {
+        // Ya no se fuerza `status: 'error'` al reparsear. El schema dejó de
+        // exigirlo, y forzarlo acá además pisaba el `status` que trajera el
+        // anidado, que es dato del que no somos dueños.
+        const reparsed = ApiErrorBodySchema.safeParse(nested);
+        if (reparsed.success && reparsed.data.code) return reparsed.data;
+      }
+    } catch {
+      // No era JSON: el mensaje ya está bien como está.
     }
-  } catch {
-    // No era JSON: el mensaje ya está bien como está.
   }
   return body;
 }
@@ -84,8 +144,7 @@ export function explainHttpError(response: ApiResponse): string {
 }
 
 function describeHttpError(response: ApiResponse, body: ApiErrorBody | undefined): string {
-  const apiMessage = body?.message ?? 'La API respondió un error.';
-
+  const apiMessage = messageOf(body) ?? 'La API respondió un error.';
 
   switch (response.status) {
     case 401:
@@ -145,7 +204,27 @@ function describeHttpError(response: ApiResponse, body: ApiErrorBody | undefined
       // Acá no hay `code` que mirar, así que la detección va por texto. Es
       // frágil y está asumido: si no acierta, el mensaje neutro de más abajo
       // sigue siendo cierto, que es lo que no se puede perder.
-      if (/invalid api key|revoked|inactive/i.test(apiMessage)) {
+      //
+      // El orden de estas dos ramas importa, y la palabra que lo decide es
+      // «inactive». A secas es ambigua, y lo más común es que hable del PASE y no
+      // de la credencial. Atribuirla a la key le dice a alguien que pagó que copió
+      // mal la credencial: el error exacto que `PRODUCT_NOT_ACTIVE` existe para no
+      // cometer, colado de nuevo por la puerta de atrás del fallback. Así que
+      // primero se descarta el pase, y recién después se habla de la key.
+      if (
+        /(pass|plan|subscription)/i.test(apiMessage) &&
+        /(inactive|expired|no longer active)/i.test(apiMessage)
+      ) {
+        return (
+          `${apiMessage}\n\n` +
+          'Por el texto, parece un pase vencido o dado de baja y no un problema de ' +
+          'la API key: la key sigue siendo válida, y los motores que tenga vigentes ' +
+          'siguen respondiendo. Reintentar no lo cambia. Lo que corresponde es ' +
+          `renovar ese pase, no comprarlo otra vez: ${TRIAL_URL}`
+        );
+      }
+
+      if (/invalid api key|revoked/i.test(apiMessage)) {
         return (
           `${apiMessage}\n\n` +
           'El problema es la API key en sí, no el plan: puede estar mal copiada, ' +
@@ -162,8 +241,7 @@ function describeHttpError(response: ApiResponse, body: ApiErrorBody | undefined
       );
 
     case 429: {
-      const retryAfter = response.headers?.['retry-after'];
-      const wait = retryAfter ? `${retryAfter} segundos` : 'un momento';
+      const wait = esperaLegible(response.headers?.['retry-after']);
       return (
         `Se alcanzó el límite de peticiones de la API key. Esperá ${wait} antes de ` +
         'volver a intentar. No reintentes en bucle: cada intento fallido cuenta igual.'
