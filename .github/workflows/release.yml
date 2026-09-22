@@ -42,7 +42,7 @@ jobs:
           fi
           echo "Publicando $PKG"
 
-      # Las mismas puertas que el CI de todos los días: tipos, los 21 tests y
+      # Las mismas puertas que el CI de todos los días: tipos, la suite entera y
       # la auditoría del árbol heredado. Se repiten a propósito, porque un tag
       # puede apuntar a un commit que el CI nunca vio.
       - run: npm run check

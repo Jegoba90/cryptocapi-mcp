@@ -1,6 +1,6 @@
 # Pruebas en vivo del MCP
 
-Los 21 tests automáticos corren **sin red y sin API real**, a propósito: prueban el paquete, no el servicio. Este documento es la otra mitad, la que no se puede automatizar sin volverla frágil: ¿el paquete publicado, contra la API de producción y dentro de un agente de verdad, hace lo que promete?
+Los tests automáticos corren **sin red y sin API real**, a propósito: prueban el paquete, no el servicio. Este documento es la otra mitad, la que no se puede automatizar sin volverla frágil: ¿el paquete publicado, contra la API de producción y dentro de un agente de verdad, hace lo que promete?
 
 Se corre a mano después de cada release. Toma unos diez minutos.
 
