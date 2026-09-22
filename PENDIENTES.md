@@ -7,6 +7,11 @@ lo hiciera, no estaría en este archivo.
 Revisión del 2026-09-22. Lo que sí se arregló en esa pasada fue el mensaje de
 timeout y tres fallos de traducción de errores; están en el historial.
 
+> La revisión también anotó que faltaba el archivo `LICENSE`. **Ya no falta:** lo
+> agregó `1fcd7b9` en `main`, mientras esta revisión corría sobre un `main`
+> desactualizado. Verificado: está en el repo y npm lo mete en el tarball aunque
+> no figure en `files`.
+
 ---
 
 ## Bugs chicos
@@ -44,15 +49,6 @@ API**, así que antes de tocarlo hay que verificarlo contra producción.
 ---
 
 ## Higiene
-
-### Falta el archivo `LICENSE`
-
-`package.json` declara `"license": "MIT"` y el texto de la licencia no existe: ni
-en el repo ni en el tarball (verificado con `npm pack --dry-run`, 18 archivos).
-
-En un paquete que se publica con procedencia firmada y que argumenta
-verificabilidad en su propio README, es el hueco más visible. Agregar `LICENSE` y
-sumarlo a `files` en `package.json`.
 
 ### `src/contract/audit-trail.ts` es código muerto
 
