@@ -187,9 +187,19 @@ function describeHttpError(response: ApiResponse, body: ApiErrorBody | undefined
 /** Fallas que no llegaron a tener respuesta HTTP. */
 export function explainRequestError(error: ApiRequestError): string {
   if (error.kind === 'timeout') {
+    // Decir que REEMPLAZA no es un detalle de implementación: es lo que evita que
+    // el consejo se vuelva en contra. La variable pisa el presupuesto de las cuatro
+    // herramientas en vez de sumarse, así que un número menor al que acaba de cortar
+    // lo recorta.
+    //
+    // El mensaje de arriba trae ese número, y desde la 0.2.4 es el de verdad: hasta
+    // la 0.2.3 era siempre el default de 15 000 ms aunque hubiera cortado el
+    // presupuesto del tool, así que la cuenta le daba mal a quien seguía el consejo.
     return (
       `${error.message}\n\n` +
-      'Se puede ampliar el presupuesto con la variable CRYPTOCAPI_TIMEOUT_MS del mcp.json.'
+      'Se puede ampliar el presupuesto con la variable CRYPTOCAPI_TIMEOUT_MS del mcp.json. ' +
+      'Ojo: esa variable REEMPLAZA el presupuesto de todas las herramientas, no se suma, ' +
+      'así que hay que fijarla por encima del número de arriba o lo vas a recortar.'
     );
   }
   return (
