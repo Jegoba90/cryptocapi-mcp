@@ -112,7 +112,22 @@ En la página del paquete en npm aparece además el enlace al commit exacto. Es 
 |---|---|---|
 | `CRYPTOCAPI_API_KEY` | Tu API key | `demo_btc_eth_public` |
 | `CRYPTOCAPI_API_BASE` | Base de la API, para desarrollo | `https://api.cryptocapi.com/v1` |
-| `CRYPTOCAPI_TIMEOUT_MS` | Presupuesto por request | `15000` |
+| `CRYPTOCAPI_TIMEOUT_MS` | Presupuesto por request, en ms. Ver abajo | según la herramienta |
+
+**El presupuesto de tiempo no es uno solo.** Cada herramienta pide el suyo, porque
+no cuestan lo mismo: 20 s para un motor sobre un activo (`get_insight`,
+`get_signal`) y 45 s para los que recorren varios (`batch_signals`, `scan_market`).
+Cortar un recorrido del mercado con el presupuesto de una lectura da un timeout
+falso, y el agente concluye que la API está caída cuando en realidad estaba
+trabajando.
+
+`CRYPTOCAPI_TIMEOUT_MS` **reemplaza** esos presupuestos, no se suma a ellos: el
+número que pongas rige para las cuatro herramientas. Ponerlo en `30000` para
+darle más aire a `scan_market` en realidad se lo recorta, de 45 s a 30. Si se toca,
+conviene que sea por encima del más alto.
+
+Cuando una herramienta se corta, el error dice el presupuesto que efectivamente
+rigió, así que ese número es el que hay que superar.
 
 Conseguir una key con prueba de 14 días: [cryptocapi.com](https://cryptocapi.com)
 
@@ -125,7 +140,14 @@ npm run check   # tipos + tests + auditoría de dependencias
 
 Los tests corren con el runner nativo de Node y **no tienen una sola dependencia de test ni tocan la red**: la API se levanta falsa con `node:http`. Prueban el paquete, no el servicio, que es lo que los hace rápidos y estables.
 
+Ese runner carga TypeScript sin transpilar, así que **para desarrollar hace falta
+Node 22.18 o superior**, aunque el paquete publicado corra en 20 —que es lo que
+declara `engines`, y lo que el CI verifica arrancando el artefacto construido en
+20, 22 y 24—. Es un requisito de desarrollo, no de uso.
+
 Eso deja afuera a propósito una mitad: si el paquete publicado se porta bien contra la API real y dentro de un agente. Para eso está [PRUEBAS.md](PRUEBAS.md), catorce comprobaciones manuales que se corren después de cada release.
+
+Lo que se encontró y todavía no se arregló vive en [PENDIENTES.md](PENDIENTES.md), con el porqué de cada cosa y lo suficiente para retomarla sin volver a investigarla.
 
 ### Publicar
 
