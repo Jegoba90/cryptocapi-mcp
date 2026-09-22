@@ -1,6 +1,6 @@
 {
   "name": "@cryptocapi/mcp",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "mcpName": "io.github.Jegoba90/cryptocapi",
   "description": "Análisis de mercado cripto con sello verificable, como herramientas nativas para cualquier agente MCP. Cuatro motores; se prueba con npx, sin cuenta.",
   "type": "module",
