@@ -26,3 +26,21 @@ Sólo se copia lo que el paquete necesita para decidir, no el contrato entero.
 
 Esta tabla es el sustituto pobre del chequeo automático: sirve para auditar la
 deriva hacia atrás, no para evitarla.
+
+## Una divergencia deliberada, para que nadie la "arregle"
+
+`ApiErrorBodySchema` declara **todos** los campos opcionales, incluidos `status`
+y `message`, que en el origen son obligatorios. **No es una copia desactualizada:
+es a propósito, y volver a alinearla con el backend reintroduce un fallo.**
+
+Hasta la 0.2.3 se copiaban tal cual, con `status: z.literal("error")`. El efecto
+era que un cuerpo que no trajera esas dos claves exactamente así se descartaba
+entero, y con él se iba el `code` — lo único que `llms.txt` le manda mirar al
+agente («branch on `code`, not on the prose»). Un 403 con
+`code: PRODUCT_NOT_INCLUDED` le llegaba como un 403 pelado.
+
+El backend manda las cinco claves, así que contra él la diferencia no se nota.
+Se nota contra todo lo demás: `CRYPTOCAPI_API_BASE` existe para apuntar el
+paquete a otro despliegue, y cualquier gateway delante de la API puede
+reformatear el cuerpo. **Acá se lee con tolerancia justamente porque el origen
+del dato no siempre es el origen del contrato.**

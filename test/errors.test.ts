@@ -254,3 +254,124 @@ test('un error sin código no inventa la línea', () => {
   const text = explainHttpError(response(403, { status: 'error', message: 'Forbidden' }));
   assert.doesNotMatch(text, /code:/);
 });
+
+// ===========================================================================
+// Tolerancia de lectura del cuerpo de error.
+//
+// El `code` es lo único que el agente puede comparar sin adivinar: `llms.txt` le
+// dice «branch on `code`, not on the prose». Hasta la 0.2.3 el schema exigía
+// `status: "error"` y `message`, así que un cuerpo que no los trajera tal cual se
+// descartaba ENTERO y con él se iba el `code`: un 403 perfectamente informativo
+// le llegaba al agente como un 403 pelado.
+//
+// El backend manda las cinco claves. El que no las manda es cualquier gateway
+// delante de la API, y `CRYPTOCAPI_API_BASE` existe justo para apuntar el
+// paquete a otro lado.
+// ===========================================================================
+
+test('el code sobrevive aunque el cuerpo no traiga status ni message', () => {
+  const text = explainHttpError(
+    response(403, {
+      error: 'Forbidden',
+      code: 'PRODUCT_NOT_INCLUDED',
+      required_product: 'quant',
+      your_product: 'alpha',
+    })
+  );
+  assert.match(text, /Quant Pro/, 'tiene que nombrar el motor que falta');
+  assert.match(text, /Radar Alpha/, 'y el que la key sí incluye');
+  assert.match(text, /code: PRODUCT_NOT_INCLUDED$/, 'sin el code, el manifiesto no se puede cumplir');
+});
+
+test('el code sobrevive aunque status venga con otro valor', () => {
+  const text = explainHttpError(
+    response(403, { status: 'fail', message: 'nope', code: 'DEMO_COIN_RESTRICTED' })
+  );
+  assert.match(text, /bitcoin y ethereum/);
+  assert.match(text, /code: DEMO_COIN_RESTRICTED$/);
+});
+
+test('`error` vale como alias de `message`', () => {
+  // Es la convención de los proxies que reescriben el cuerpo. Sin leerla, se
+  // pierde la única frase que el agente le puede mostrar a la persona.
+  const text = explainHttpError(response(404, { error: 'Coin not found: dogecoinn' }));
+  assert.match(text, /Coin not found: dogecoinn/);
+});
+
+// ===========================================================================
+// Retry-After: RFC 9110 admite segundos O fecha HTTP.
+// ===========================================================================
+
+test('Retry-After como fecha HTTP se traduce a segundos', () => {
+  // Concatenar el header crudo con «segundos» daba «Esperá Wed, 21 Oct 2026
+  // 07:28:00 GMT segundos». El agente se queda sin número contra el cual
+  // esperar, y sin número reintenta: el bucle que el mensaje quiere cortar.
+  const dentroDeUnMinuto = new Date(Date.now() + 60_000).toUTCString();
+  const text = explainHttpError(
+    response(429, { status: 'error', message: 'slow down' }, { 'retry-after': dentroDeUnMinuto })
+  );
+  assert.match(text, /\d+ segundos/);
+  assert.doesNotMatch(text, /GMT/, 'la fecha cruda no le sirve de nada al agente');
+});
+
+test('Retry-After con una fecha ya pasada no promete una espera negativa', () => {
+  const haceUnRato = new Date(Date.now() - 60_000).toUTCString();
+  const text = explainHttpError(
+    response(429, { status: 'error', message: 'slow down' }, { 'retry-after': haceUnRato })
+  );
+  assert.match(text, /un momento/);
+  assert.doesNotMatch(text, /-\d/, 'una espera negativa es peor que no decir nada');
+});
+
+test('Retry-After en segundos sigue funcionando igual', () => {
+  const text = explainHttpError(
+    response(429, { status: 'error', message: 'slow down' }, { 'retry-after': '42' })
+  );
+  assert.match(text, /42 segundos/);
+});
+
+// ===========================================================================
+// El sniffing por texto del 403 sin code.
+// ===========================================================================
+
+test('un 403 sin code que habla de un pase vencido no culpa a la key', () => {
+  // La detección atribuía cualquier «inactive» a la credencial, así que a un
+  // cliente con el pase vencido le decía que había copiado mal la key. Es el
+  // error exacto que PRODUCT_NOT_ACTIVE existe para no cometer, colado de nuevo
+  // por la puerta de atrás del fallback.
+  for (const message of ["Your 'quant' pass is inactive.", 'Your subscription is inactive.']) {
+    const text = explainHttpError(response(403, { status: 'error', message }));
+    assert.match(text, /renovar/, `"${message}" habla del pase, no de la credencial`);
+    assert.ok(
+      !/mal copiada|revocada o dada de baja/.test(text),
+      `"${message}": la key está bien, el que venció es el pase`
+    );
+  }
+});
+
+test('Retry-After que no promete espera da la misma respuesta que una fecha pasada', () => {
+  // «0» significa «ya podés reintentar», pero la frase que lo envuelve
+  // desaconseja el bucle: «Esperá 0 segundos [...] No reintentes en bucle» se
+  // contradice sola. Es el mismo significado que una fecha ya pasada, así que
+  // tiene que dar la misma salida: dos caminos para lo mismo no pueden
+  // contestar distinto.
+  for (const ra of ['0', '-5']) {
+    const text = explainHttpError(
+      response(429, { status: 'error', message: 'slow down' }, { 'retry-after': ra })
+    );
+    assert.match(text, /un momento/, `Retry-After "${ra}" no debería prometer una espera`);
+    assert.doesNotMatch(text, /0 segundos|-5/);
+  }
+});
+
+test('un Retry-After que no es ninguna de las dos formas del RFC no se inventa un número', () => {
+  // `Number('0x10')` da 16 y `Number('1e3')` da 1000. Ninguno es un Retry-After
+  // válido, y contestarlos manda al agente a esperar cualquier cosa.
+  for (const ra of ['0x10', '1e3', 'abc', 'Infinity']) {
+    const text = explainHttpError(
+      response(429, { status: 'error', message: 'slow down' }, { 'retry-after': ra })
+    );
+    assert.match(text, /un momento/, `"${ra}" no es una espera y no puede leerse como tal`);
+    assert.doesNotMatch(text, /\d+ segundos/, `"${ra}" no puede volverse un número`);
+  }
+});
