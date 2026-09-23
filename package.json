@@ -47,7 +47,7 @@
     "check": "npm run typecheck && npm run test && npm run audit",
     "start": "node dist/index.js",
     "dev": "tsc --watch",
-    "contrato": "npm run build && node scripts/contrato.mjs"
+    "contrato": "npm run build && node scripts/contrato.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

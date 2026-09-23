@@ -19,7 +19,7 @@ cerró sin hacer.
 npm run contrato
 ```
 
-[`scripts/contrato.mjs`](../../scripts/contrato.mjs) pega a la API **real** con la
+[`scripts/contrato.ts`](../../scripts/contrato.ts) pega a la API **real** con la
 key pública de demostración y verifica que lo copiado acá siga siendo cierto: que
 los dos sellos validen contra `AuditTrailSchema`, que los 403 traigan su `code`
 **plano** y su `required_product`, y que el alcance de la demo key sea el que la
