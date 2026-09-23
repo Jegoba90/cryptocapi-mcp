@@ -69,6 +69,66 @@ Cualquiera de estas tres, sin esperar a la revisión:
 Si llega el 2026-09-28 y no pasó ninguna, la decisión razonable es volver a
 dejarlo esperando y correr esta fecha, no publicar por cumplir.
 
+**Salvo que se hagan las `annotations`** de la sección siguiente. Ésas viven en
+`src/tools.ts`, o sea que **sí viajan en el tarball**, y son una mejora medible
+para los agentes. Si se hacen, ése es el contenido de la 0.2.5 y el clamp del
+`setTimeout` viaja con ellas: deja de haber que decidir entre publicar por
+cumplir o no publicar nada.
+
+---
+
+## Usabilidad para agentes
+
+Medido el 2026-09-23 contra el binario construido y contra los tipos del SDK
+instalado. El diagnóstico corto: **el servidor está al día y le falta una cosa
+concreta.**
+
+Lo que ya está bien, para no tocarlo sin querer: los tools no son 1:1 con los
+endpoints y absorben la trampa de formato, las descripciones nombran el motor en
+vez de un «PRO» genérico, y los errores terminan en `code: <CODE>` para que el
+agente ramifique sin adivinar.
+
+| Qué | Medido |
+| :--- | :--- |
+| Protocolo MCP | negocia `2025-11-25`, la última que soporta el SDK |
+| SDK | `1.30.0` instalado, `1.30.1` disponible — un patch atrás |
+| Costo fijo de `tools/list` | ~4.200 bytes (~1.050 tokens) por sesión |
+| Costo por respuesta | ~500 tokens (Radar alpha), ~880 (Quant Plus) |
+
+### Ningún tool declara `annotations`
+
+El SDK las soporta —`readOnlyHint`, `destructiveHint`, `idempotentHint`,
+`openWorldHint`— y **las cuatro herramientas son read-only, no destructivas,
+idempotentes y open-world**: leen de una API externa y no cambian nada.
+
+Sin esas señales, un cliente MCP estricto no puede auto-aprobar las llamadas y le
+pregunta al usuario cada vez. **Es fricción, no rotura**: el agente puede llamar
+a las cuatro igual. Por eso no bloqueó el go de la 0.2.4.
+
+El arreglo es declararlas en los cuatro `registerTool` de
+[`src/tools.ts`](src/tools.ts). Conviene sumar un test que falle si alguna se
+pierde, como el que ya fija la superficie de cuatro motores.
+
+### `outputSchema` / `structuredContent`: NO va, y hay que dejarlo escrito
+
+Es la feature que un lector desprevenido va a echar de menos, porque es «lo
+moderno» y el SDK la soporta. **Ponerla rompería la única promesa del producto.**
+
+`structuredContent` viaja como objeto JSON que el cliente re-serializa. Este
+paquete existe para reenviar el cuerpo **byte a byte**, porque reformatear un solo
+número alcanza para que el `protocol_hash` deje de verificar. Un agente que
+calculara el sello desde `structuredContent` obtendría un hash que no verifica,
+y el fallo sería silencioso: no hay error, solo dos hashes que no coinciden.
+
+O sea que la omisión es **correcta y deliberada**. Lo que falta es que esté dicha
+en el código, para que nadie la lea como un olvido y la «arregle». El lugar es el
+comentario de cabecera de [`src/tools.ts`](src/tools.ts), donde ya está escrito el
+principio de reenvío verbatim.
+
+### El patch del SDK
+
+`1.30.0` → `1.30.1`. Trivial, va con lo anterior cuando se toque el paquete.
+
 ---
 
 ## Sigue abierto, dentro del repo
