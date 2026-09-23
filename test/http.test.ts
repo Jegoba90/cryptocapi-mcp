@@ -118,3 +118,20 @@ test('una ruta que contesta no se ve afectada por el presupuesto', async () => {
     await api.close();
   }
 });
+
+test('un CRYPTOCAPI_TIMEOUT_MS que desborda 32 bits se corta en el maximo real', async () => {
+  // Pasarse del entero de 32 bits no da un timer mas largo: Node lo fija en 1 ms
+  // y avisa con TimeoutOverflowWarning. Quien pedia el presupuesto mas grande
+  // posible obtenia el mas chico, y el mensaje le decia que habia esperado 25 dias.
+  const cfg = loadConfig({
+    CRYPTOCAPI_API_KEY: 'sk_test_fake',
+    CRYPTOCAPI_TIMEOUT_MS: '2147483648',
+  });
+  assert.equal(cfg.timeoutMs, 2_147_483_647, 'el presupuesto se corta en el borde de setTimeout');
+  assert.equal(cfg.timeoutExplicit, true, 'sigue siendo una decision del usuario');
+});
+
+test('un CRYPTOCAPI_TIMEOUT_MS normal no se toca', () => {
+  assert.equal(loadConfig({ CRYPTOCAPI_TIMEOUT_MS: '30000' }).timeoutMs, 30_000);
+  assert.equal(loadConfig({}).timeoutMs, 15_000);
+});

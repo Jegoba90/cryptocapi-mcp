@@ -1,0 +1,95 @@
+name: Contrato
+
+# Corre solo, una vez por día, contra la API de producción.
+#
+# Por qué no está en el CI de cada commit: ese CI no toca la red a propósito,
+# para ser rápido y determinista. Meter una llamada real adentro lo volvería
+# lento y, peor, intermitente — un CI que falla por la red se empieza a ignorar.
+#
+# Pero ese aislamiento tiene un punto ciego, y en septiembre de 2026 se cobró
+# cuatro bugs: tres eran sobre qué manda la API de verdad contra qué asumía el
+# paquete, y ninguno podía fallar contra un servidor falso. Este workflow mira
+# justo eso, por fuera y sin bloquear a nadie.
+on:
+  schedule:
+    # 06:17 UTC. Minuto no redondo a propósito: los horarios en punto son los
+    # más congestionados en los runners de GitHub y se encolan.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Para avisar cuando el contrato se mueve. Un fallo en un workflow programado
+  # que nadie mira no sirve de nada: tiene que dejar rastro donde se lee.
+  issues: write
+
+concurrency:
+  group: contrato
+  cancel-in-progress: false
+
+jobs:
+  contrato:
+    name: El contrato del backend sigue en pie
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Sin API key: usa la demo pública, que es parte de lo que se verifica.
+      - name: Chequeo de contrato
+        id: chequeo
+        shell: bash
+        run: |
+          set +e
+          npm run contrato --silent 2>&1 | tee salida.txt
+          CODE=${PIPESTATUS[0]}
+          set -e
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+
+          # 2 es "no se pudo verificar" (rate limit o API caida), que NO es lo
+          # mismo que "el contrato se movio". Abrir un issue acusando al backend
+          # cada vez que nos limitan convierte esta reja en ruido, y una reja
+          # ruidosa se ignora. Queda como warning visible y nada mas.
+          if [ "$CODE" = "2" ]; then
+            echo "::warning::No se pudo verificar el contrato (rate limit o API no disponible). No dice nada sobre el contrato."
+          fi
+          exit 0
+
+      - name: Avisar que el contrato se movio
+        if: steps.chequeo.outputs.code == '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          TITULO="El contrato del backend se movio respecto de src/contract/"
+          {
+            echo "El chequeo diario encontro que la API real dejo de cumplir algo que el"
+            echo "paquete asume. \`src/contract/\` es una copia a mano, asi que esto NO rompe"
+            echo "la compilacion ni los tests: por eso existe este aviso."
+            echo ""
+            echo "Corrida: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo ""
+            echo '```'
+            cat salida.txt
+            echo '```'
+          } > cuerpo.md
+
+          # Si ya hay uno abierto, se comenta ahi en vez de abrir otro: un issue
+          # nuevo por dia es la forma mas rapida de que dejen de leerse.
+          EXISTE="$(gh issue list --state open --search "in:title \"$TITULO\"" --json number --jq '.[0].number // empty')"
+          if [ -n "$EXISTE" ]; then
+            gh issue comment "$EXISTE" --body-file cuerpo.md
+            echo "Comentado en el issue #$EXISTE"
+          else
+            gh issue create --title "$TITULO" --body-file cuerpo.md
+          fi
+
+      - name: Fallar si el contrato se movio
+        if: steps.chequeo.outputs.code == '1'
+        run: exit 1
