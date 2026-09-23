@@ -135,7 +135,8 @@ Conseguir una key con prueba de 14 días: [cryptocapi.com](https://cryptocapi.co
 
 ```bash
 npm install
-npm run check   # tipos + tests + auditoría de dependencias
+npm run check      # tipos + tests + auditoría de dependencias
+npm run contrato   # verifica contra la API real que el contrato copiado sigue vigente
 ```
 
 Los tests corren con el runner nativo de Node y **no tienen una sola dependencia de test ni tocan la red**: la API se levanta falsa con `node:http`. Prueban el paquete, no el servicio, que es lo que los hace rápidos y estables.
@@ -146,6 +147,13 @@ declara `engines`, y lo que el CI verifica arrancando el artefacto construido en
 20, 22 y 24—. Es un requisito de desarrollo, no de uso.
 
 Eso deja afuera a propósito una mitad: si el paquete publicado se porta bien contra la API real y dentro de un agente. Para eso está [PRUEBAS.md](PRUEBAS.md), catorce comprobaciones manuales que se corren después de cada release.
+
+`npm run contrato` cubre una parte de esa mitad sin intervención humana. Los tests
+no tocan la red a propósito, y ese aislamiento tiene un punto ciego: en septiembre
+de 2026 se encontraron cuatro bugs y **tres eran sobre qué manda la API de verdad
+contra qué asumía el paquete**, invisibles para un servidor falso que solo devuelve
+lo que el test escribió. El chequeo de contrato mira justo eso, corre solo una vez
+por día y abre un issue si algo se movió.
 
 Lo que se encontró y todavía no se arregló vive en [PENDIENTES.md](PENDIENTES.md), con el porqué de cada cosa y lo suficiente para retomarla sin volver a investigarla.
 

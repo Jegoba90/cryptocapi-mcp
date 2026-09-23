@@ -11,10 +11,34 @@ silencio. Un cambio en el contrato del backend no rompe la compilación acá,
 que es exactamente el riesgo que el plan quería evitar al elegir TypeScript
 sobre Go (§3.4).
 
-**Cómo se mitiga, y qué falta:** cada archivo declara de qué archivo fuente
-salió. **El chequeo automático sigue sin existir**: el plan lo daba por F3 y F3
-cerró sin él. Hasta que exista, al tocar `shared/schemas` o los códigos de error
-del backend hay que venir a mirar acá a mano.
+**Cómo se mitiga:** cada archivo declara de qué archivo fuente salió, y desde el
+2026-09-23 **existe el chequeo automático** que el plan daba por F3 y que F3
+cerró sin hacer.
+
+```bash
+npm run contrato
+```
+
+[`scripts/contrato.mjs`](../../scripts/contrato.mjs) pega a la API **real** con la
+key pública de demostración y verifica que lo copiado acá siga siendo cierto: que
+los dos sellos validen contra `AuditTrailSchema`, que los 403 traigan su `code`
+**plano** y su `required_product`, y que el alcance de la demo key sea el que la
+documentación promete. Corre además solo, una vez por día, desde
+[`.github/workflows/contrato.yml`](../../.github/workflows/contrato.yml), y abre un
+issue si algo se movió.
+
+Distingue «el contrato se movió» (sale con 1) de «no se pudo verificar por rate
+limit o red» (sale con 2). No es un detalle: una reja que acusa al backend cada
+vez que la limitan se vuelve ruido y se deja de leer.
+
+**Lo que el chequeo no alcanza:** con la demo key, `get_signal` y `scan_market`
+solo se ven en su forma 403. Eso igual tiene valor —ese 403 ES parte del contrato
+que el paquete traduce— pero sus caminos felices quedan sin cubrir salvo que se le
+pase una key paga en `CRYPTOCAPI_API_KEY`. Y del enum de sellos queda sin ver
+`output_seal`, que la demo key no produce.
+
+Al tocar `shared/schemas` o los códigos de error del backend sigue conviniendo
+venir a mirar acá; la diferencia es que ahora, si nadie mira, el chequeo avisa.
 
 Sólo se copia lo que el paquete necesita para decidir, no el contrato entero.
 

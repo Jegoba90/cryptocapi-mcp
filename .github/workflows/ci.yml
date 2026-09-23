@@ -11,17 +11,20 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# La imagen va fija y no en `ubuntu-latest`: esa etiqueta migra a Ubuntu 26 a
+# partir del 2026-10-19, y una migracion silenciosa del runner es de las cosas
+# que aparecen como un fallo raro un lunes. Subirla pasa a ser una decision.
 jobs:
   check:
     name: Tipos y tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # El runner de tests es el nativo de Node, que carga TypeScript sin
       # transpilar. Eso exige Node 22.18 o superior, aunque el paquete
       # publicado corra en 20: es requisito de desarrollo, no de uso.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -32,14 +35,14 @@ jobs:
 
   compatibilidad:
     name: El artefacto arranca en Node ${{ matrix.node }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         node: [20, 22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -81,10 +84,10 @@ jobs:
 
   dependencias:
     name: Auditoría del árbol heredado
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm

@@ -17,11 +17,11 @@ permissions:
 jobs:
   publicar:
     name: Publicar en npm con procedencia
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -32,7 +32,7 @@ jobs:
       # Un tag que no coincide con la version publica algo que nadie pidió, y
       # en npm una version no se puede reusar: el error no se deshace. Se corta
       # acá, antes de construir nada.
-      - name: El tag coincide con la version del package.json
+      - name: El tag coincide con todas las versiones declaradas
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           PKG="$(node -p "require('./package.json').version")"
@@ -40,7 +40,19 @@ jobs:
             echo "El tag dice $TAG y el package.json dice $PKG."
             exit 1
           fi
-          echo "Publicando $PKG"
+
+          # server.json declara la version DOS veces y hasta ahora no la miraba
+          # nadie: se bumpea a mano, asi que podia quedar atras sin que nada lo
+          # notara. Paso de hecho entre la 0.2.3 y el commit que la corrigio, que
+          # quedo despues del tag y por lo tanto fuera de lo publicado.
+          SRV="$(node -p "require('./server.json').version")"
+          SRV_PKG="$(node -p "require('./server.json').packages[0].version")"
+          if [ "$TAG" != "$SRV" ] || [ "$TAG" != "$SRV_PKG" ]; then
+            echo "El tag dice $TAG y server.json dice $SRV (paquete: $SRV_PKG)."
+            exit 1
+          fi
+
+          echo "Publicando $PKG, con server.json alineado"
 
       # Las mismas puertas que el CI de todos los días: tipos, la suite entera y
       # la auditoría del árbol heredado. Se repiten a propósito, porque un tag

@@ -75,7 +75,11 @@ async function correrServidor(apiBase: string): Promise<Corrida> {
 
 test('stdout lleva SOLO JSON-RPC, y el diagnóstico sale por stderr', async () => {
   const api = await startFakeApi({
-    '/v1/market/market-summary': { status: 200, body: '{"total_market_cap":"1.50"}' },
+    // La ruta que el handshake de abajo realmente pide. Hasta hoy figuraba
+    // '/v1/market/market-summary', de un tool retirado el 2026-08-30: el test
+    // pasaba igual, pero la llamada caia al 404 por defecto y nunca ejercitaba
+    // un 200 como parecia creer.
+    '/v1/market/insights/bitcoin': { status: 200, body: '{"status":"success","data":null}' },
   });
   try {
     const { stdout, stderr } = await correrServidor(`${api.url}/v1`);
