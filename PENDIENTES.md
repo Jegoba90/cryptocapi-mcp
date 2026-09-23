@@ -32,6 +32,45 @@ estas ramas va a ver los ítems y merece saber cómo terminaron.
 
 ---
 
+## Decidido: `main` va adelante de npm, y está bien
+
+**Revisar la semana del lunes 2026-09-28.**
+
+La última versión publicada es la **0.2.4**. Desde su tag, `main` tiene un solo
+cambio que llega al paquete instalado: el clamp del `setTimeout` en
+[`src/config.ts`](src/config.ts). Todo lo demás —el chequeo de contrato, los
+workflows, los tests, esta documentación— **no viaja en el tarball**.
+
+Se decidió el 2026-09-23 **no publicar una 0.2.5** por eso solo. Para que el
+clamp cambie algo, el usuario tiene que haber puesto `CRYPTOCAPI_TIMEOUT_MS` por
+encima de 2.147.483.647 ms, o sea más de 24 días de presupuesto para una
+request. Nadie lo reportó y nadie lo pone por accidente. Publicar una versión
+cuyo único efecto práctico es un caso que no le pasa a nadie suma una entrada de
+changelog sin ganancia para ningún usuario.
+
+El cambio de `zod` en el manifiesto (`^4.3.6` → `^4.6.5`) tampoco mueve nada: el
+rango viejo **ya permitía** la 4.6.5, así que quien instala la 0.2.4 hoy la
+recibe igual. Solo sube el piso.
+
+Esto queda escrito para que quien mire el repo dentro de unos meses no se
+pregunte por qué `main` difiere de lo que está en npm. **No es un olvido.**
+
+### Qué dispara la 0.2.5
+
+Cualquiera de estas tres, sin esperar a la revisión:
+
+1. **El chequeo diario de contrato se pone rojo.** Si el backend mueve el
+   contrato, el arreglo cae en `src/` y ahí sí hay que publicar. El workflow abre
+   un issue solo, así que no hace falta vigilarlo.
+2. **Alguien reporta un bug real** en cualquiera de los cuatro motores.
+3. **Cualquier otro cambio de comportamiento** que amerite llegar al usuario. El
+   clamp viaja con él.
+
+Si llega el 2026-09-28 y no pasó ninguna, la decisión razonable es volver a
+dejarlo esperando y correr esta fecha, no publicar por cumplir.
+
+---
+
 ## Sigue abierto, dentro del repo
 
 ### Las dos advisories `moderate` del `npm audit`
