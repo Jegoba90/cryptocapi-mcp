@@ -11,5 +11,8 @@
     // artefacto compilado.
     "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  // `scripts/` entra acá y no en el build: son herramientas del repo, no viajan
+  // en el tarball. Pero corren bajo el mismo `strict` que todo lo demás, porque
+  // un chequeo de contrato sin tipos es una reja sin reja.
+  "include": ["src/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"]
 }
