@@ -4,13 +4,24 @@ Lo que se encontró y **no** se arregló, con el porqué y lo suficiente para
 retomarlo sin volver a investigarlo. Nada de acá bloquea una release; si alguno
 lo hiciera, no estaría en este archivo.
 
-Revisión del 2026-09-22, ampliada y barrida el 2026-09-23. Lo que se arregló está
-en el historial: el mensaje de timeout y tres fallos de traducción de errores
-salieron en la 0.2.4, y la tanda de higiene vino después.
+Revisión del 2026-09-22, ampliada y barrida el 2026-09-23 y el 2026-09-28. Lo que
+se arregló está en el historial: el mensaje de timeout y tres fallos de traducción
+de errores salieron en la 0.2.4, la tanda de higiene vino después, y la
+usabilidad para agentes cierra con la 0.2.5.
 
 **Lo que queda abierto vive casi todo fuera de este repo.** Está al final.
 
 ---
+
+## Cerrado el 2026-09-28
+
+| Qué era | Cómo cerró |
+| :--- | :--- |
+| Ningún tool declara `annotations` | Los cuatro declaran solo lectura (`SOLO_LECTURA` en `src/tools.ts`), con un test que compara el objeto entero. Suma ~410 bytes a `tools/list`, unos 100 tokens por sesión |
+| No estaba dicho por qué no hay `structuredContent` | Dicho en la cabecera de `src/tools.ts`, y un test falla si alguien agrega `outputSchema` |
+| SDK un patch atrás | `1.30.0` → `1.31.0`. El rango `^1.30.0` ya se la instalaba a los usuarios: ahora los tests corren contra lo mismo |
+| El MCP Registry anunciaba la 0.2.3 | La 0.2.4 se publicó a mano, y desde `440f617` el tag publica en el Registry desde `release.yml` |
+| La descripción del Registry decía «PRO» | Cambiada en `server.json`; llega al Registry con la 0.2.5 |
 
 ## Cerrado el 2026-09-23
 
@@ -32,102 +43,37 @@ estas ramas va a ver los ítems y merece saber cómo terminaron.
 
 ---
 
-## Decidido: `main` va adelante de npm, y está bien
+## La 0.2.5 tiene contenido
 
-**Revisar la semana del lunes 2026-09-28.**
+La revisión del 2026-09-28 se resolvió publicando, no corriendo la fecha. Había
+quedado escrita la condición: si se hacían las `annotations`, ése era el
+contenido de la 0.2.5, porque viven en `src/tools.ts` y viajan en el tarball.
+Se hicieron. La 0.2.5 lleva:
 
-La última versión publicada es la **0.2.4**. Desde su tag, `main` tiene un solo
-cambio que llega al paquete instalado: el clamp del `setTimeout` en
-[`src/config.ts`](src/config.ts). Todo lo demás —el chequeo de contrato, los
-workflows, los tests, esta documentación— **no viaja en el tarball**.
+- las `annotations` de los cuatro tools, que es lo que la justifica;
+- el clamp del `setTimeout` en [`src/config.ts`](src/config.ts), que esperaba
+  desde el 2026-09-23 porque solo no alcanzaba para publicar;
+- el piso del SDK en `^1.31.0`;
+- el README con el logo, que en la página de npm aparece recién con esta versión;
+- la descripción nueva del Registry, que por primera vez publica solo el job
+  `registry` de `release.yml`.
 
-Se decidió el 2026-09-23 **no publicar una 0.2.5** por eso solo. Para que el
-clamp cambie algo, el usuario tiene que haber puesto `CRYPTOCAPI_TIMEOUT_MS` por
-encima de 2.147.483.647 ms, o sea más de 24 días de presupuesto para una
-request. Nadie lo reportó y nadie lo pone por accidente. Publicar una versión
-cuyo único efecto práctico es un caso que no le pasa a nadie suma una entrada de
-changelog sin ganancia para ningún usuario.
+**Dos cosas para mirar después de publicarla.** Que la página de npm muestre las
+imágenes del README, que van con ruta relativa. Y que el job `registry` haya
+corrido: si falló, npm ya quedó publicado y se reintenta solo ese job.
 
-El cambio de `zod` en el manifiesto (`^4.3.6` → `^4.6.5`) tampoco mueve nada: el
-rango viejo **ya permitía** la 4.6.5, así que quien instala la 0.2.4 hoy la
-recibe igual. Solo sube el piso.
+### Qué dispara una versión
 
-Esto queda escrito para que quien mire el repo dentro de unos meses no se
-pregunte por qué `main` difiere de lo que está en npm. **No es un olvido.**
-
-### Qué dispara la 0.2.5
-
-Cualquiera de estas tres, sin esperar a la revisión:
+Cualquiera de estas tres, sin esperar a una revisión:
 
 1. **El chequeo diario de contrato se pone rojo.** Si el backend mueve el
    contrato, el arreglo cae en `src/` y ahí sí hay que publicar. El workflow abre
    un issue solo, así que no hace falta vigilarlo.
 2. **Alguien reporta un bug real** en cualquiera de los cuatro motores.
-3. **Cualquier otro cambio de comportamiento** que amerite llegar al usuario. El
-   clamp viaja con él.
+3. **Cualquier otro cambio de comportamiento** que amerite llegar al usuario.
 
-Si llega el 2026-09-28 y no pasó ninguna, la decisión razonable es volver a
-dejarlo esperando y correr esta fecha, no publicar por cumplir.
-
-**Salvo que se hagan las `annotations`** de la sección siguiente. Ésas viven en
-`src/tools.ts`, o sea que **sí viajan en el tarball**, y son una mejora medible
-para los agentes. Si se hacen, ése es el contenido de la 0.2.5 y el clamp del
-`setTimeout` viaja con ellas: deja de haber que decidir entre publicar por
-cumplir o no publicar nada.
-
----
-
-## Usabilidad para agentes
-
-Medido el 2026-09-23 contra el binario construido y contra los tipos del SDK
-instalado. El diagnóstico corto: **el servidor está al día y le falta una cosa
-concreta.**
-
-Lo que ya está bien, para no tocarlo sin querer: los tools no son 1:1 con los
-endpoints y absorben la trampa de formato, las descripciones nombran el motor en
-vez de un «PRO» genérico, y los errores terminan en `code: <CODE>` para que el
-agente ramifique sin adivinar.
-
-| Qué | Medido |
-| :--- | :--- |
-| Protocolo MCP | negocia `2025-11-25`, la última que soporta el SDK |
-| SDK | `1.30.0` instalado, `1.30.1` disponible — un patch atrás |
-| Costo fijo de `tools/list` | ~4.200 bytes (~1.050 tokens) por sesión |
-| Costo por respuesta | ~500 tokens (Radar alpha), ~880 (Quant Plus) |
-
-### Ningún tool declara `annotations`
-
-El SDK las soporta —`readOnlyHint`, `destructiveHint`, `idempotentHint`,
-`openWorldHint`— y **las cuatro herramientas son read-only, no destructivas,
-idempotentes y open-world**: leen de una API externa y no cambian nada.
-
-Sin esas señales, un cliente MCP estricto no puede auto-aprobar las llamadas y le
-pregunta al usuario cada vez. **Es fricción, no rotura**: el agente puede llamar
-a las cuatro igual. Por eso no bloqueó el go de la 0.2.4.
-
-El arreglo es declararlas en los cuatro `registerTool` de
-[`src/tools.ts`](src/tools.ts). Conviene sumar un test que falle si alguna se
-pierde, como el que ya fija la superficie de cuatro motores.
-
-### `outputSchema` / `structuredContent`: NO va, y hay que dejarlo escrito
-
-Es la feature que un lector desprevenido va a echar de menos, porque es «lo
-moderno» y el SDK la soporta. **Ponerla rompería la única promesa del producto.**
-
-`structuredContent` viaja como objeto JSON que el cliente re-serializa. Este
-paquete existe para reenviar el cuerpo **byte a byte**, porque reformatear un solo
-número alcanza para que el `protocol_hash` deje de verificar. Un agente que
-calculara el sello desde `structuredContent` obtendría un hash que no verifica,
-y el fallo sería silencioso: no hay error, solo dos hashes que no coinciden.
-
-O sea que la omisión es **correcta y deliberada**. Lo que falta es que esté dicha
-en el código, para que nadie la lea como un olvido y la «arregle». El lugar es el
-comentario de cabecera de [`src/tools.ts`](src/tools.ts), donde ya está escrito el
-principio de reenvío verbatim.
-
-### El patch del SDK
-
-`1.30.0` → `1.30.1`. Trivial, va con lo anterior cuando se toque el paquete.
+Lo que no viaja en el tarball —workflows, tests, esta documentación— no dispara
+nada. Que `main` vaya adelante de npm por eso no es un olvido.
 
 ---
 
