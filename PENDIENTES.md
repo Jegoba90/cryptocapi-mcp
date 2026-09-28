@@ -196,34 +196,41 @@ Encontradas el 2026-09-28 y anotadas donde se arreglan, en
   traduce bien el 429; lo que falta es que el límite exista en la documentación
   o deje de aplicarse a las keys autenticadas.
 
-### El front no ofrece el MCP, solo la documentación
+### La portada nombra el MCP, pero no trae el JSON para instalarlo
 
 Decisión de producto, no defecto. Queda anotada porque el argumento es concreto.
 
-El MCP es **el único camino al producto que funciona sin registro**: seis líneas
-de JSON y el visitante tiene un análisis firmado de Bitcoin dentro de su agente.
-Verificado de punta a punta el 2026-09-23 contra la 0.2.4 publicada, con hash
-idéntico al de la API.
+Esta nota decía antes que el front no ofrecía el MCP, sin haberlo podido
+verificar: la SPA devuelve el mismo HTML en todas las rutas. **Era falso en
+parte.** Leído en `frontend/src/features/home/home.html` del repo del sitio el
+2026-09-28, la portada hoy:
 
-La documentación la lee quien ya decidió integrar; el front lo lee quien todavía
-está decidiendo si le importa. Dejar la demo de fricción cero detrás de la docu
-hace que **la prueba más fuerte solo la vea quien ya está convencido.**
+- dice en el hero «REST y MCP nativo, gratis para empezar»;
+- explica el MCP nativo en la sección «Conectalo vos, o que lo haga tu agente»,
+  con un chip «MCP nativo» que lleva a `/docs/agentes#mcp`;
+- trae un bloque para pegarle a un agente de código, que le pide leer el
+  `llms.txt` y usar la demo key.
 
-Y el diferenciador es difícil de explicar en prosa —«un checksum que prueba que el
-cálculo es reproducible y no lo escribió un LLM»— pero fácil de mostrar. El MCP es
-el mecanismo para mostrarlo.
+**Lo que falta es el JSON.** Para instalar el MCP hay que ir hasta la guía, así
+que la decisión que queda es chica: si vale ahorrar ese clic con el bloque de
+configuración en la portada.
 
-Hay un contraargumento real: si el cliente ideal es el integrador que compra REST,
-el MCP es un canal lateral y el front tiene que quedarse enfocado. Las home mueren
-por exceso de llamadas a la acción. El `<title>` del sitio ya dice «señales cripto
-verificables para apps y agentes», así que el posicionamiento no falta: falta la
-rampa concreta.
+A favor: el MCP es **el único camino al producto que funciona sin registro**.
+Seis líneas de JSON y el visitante tiene un análisis firmado de Bitcoin dentro de
+su agente; verificado de punta a punta el 2026-09-23 contra la 0.2.4, con hash
+idéntico al de la API. La documentación la lee quien ya decidió integrar, y la
+portada quien todavía está decidiendo. El sello cuesta explicarlo en prosa y se
+entiende al verlo funcionar.
 
-Propuesta mínima, si se decide hacerlo: no una sección sino **un bloque**, con el
-mismo JSON que ya vive en el `llms.txt` y en el README, cerca del CTA principal y
-con una línea encima del estilo «Pegá esto en tu agente y pedile el análisis de
-Bitcoin. Sin cuenta.»
+En contra: si el cliente ideal es el integrador que compra REST, el MCP es un
+canal lateral, y las portadas se mueren por exceso de llamadas a la acción. La
+portada ya tiene dos rampas para agentes, el chip y el bloque del prompt; una
+tercera compite con ellas.
 
-> No se pudo verificar desde el repo qué muestra hoy el front: `cryptocapi.com` y
-> `/docs/agentes` devuelven el mismo HTML byte a byte, porque es una SPA y el
-> contenido se arma en el cliente. Lo de arriba asume lo que reportó el autor.
+Propuesta mínima, si se decide hacerlo: no una sección nueva sino el JSON
+**dentro** de la sección de integración que ya existe, junto al chip, con una
+línea del estilo «Pegá esto en tu agente y pedile el análisis de Bitcoin. Sin
+cuenta.»
+
+Y un motivo más para cuidar el `llms.txt`: el bloque del prompt de la portada
+manda a leerlo, así que lo que diga mal la portada lo multiplica.
