@@ -43,24 +43,21 @@ estas ramas va a ver los ítems y merece saber cómo terminaron.
 
 ---
 
-## La 0.2.5 tiene contenido
+## La 0.2.5 salió el 2026-09-28
 
-La revisión del 2026-09-28 se resolvió publicando, no corriendo la fecha. Había
-quedado escrita la condición: si se hacían las `annotations`, ése era el
-contenido de la 0.2.5, porque viven en `src/tools.ts` y viajan en el tarball.
-Se hicieron. La 0.2.5 lleva:
+La revisión de ese día se resolvió publicando, no corriendo la fecha: las
+`annotations` viajan en el tarball, que era la condición que había quedado
+escrita. La versión lleva las `annotations` de los cuatro tools, el clamp del
+`setTimeout` que esperaba desde el 2026-09-23, el piso del SDK en `^1.31.0`, el
+README con el logo y la descripción nueva del Registry. Salió a npm con
+procedencia, atada al commit `8154167`, y al Registry por primera vez desde
+`release.yml`.
 
-- las `annotations` de los cuatro tools, que es lo que la justifica;
-- el clamp del `setTimeout` en [`src/config.ts`](src/config.ts), que esperaba
-  desde el 2026-09-23 porque solo no alcanzaba para publicar;
-- el piso del SDK en `^1.31.0`;
-- el README con el logo, que en la página de npm aparece recién con esta versión;
-- la descripción nueva del Registry, que por primera vez publica solo el job
-  `registry` de `release.yml`.
-
-**Dos cosas para mirar después de publicarla.** Que la página de npm muestre las
-imágenes del README, que van con ruta relativa. Y que el job `registry` haya
-corrido: si falló, npm ya quedó publicado y se reintenta solo ese job.
+**El job del Registry falló en el primer intento.** npm aceptó el publish
+avisando que el paquete «may take a few minutes to become available», y tardó
+unos cuatro minutos y medio en servirlo: los tres reintentos de 20 s se agotaron
+mucho antes. Se relanzó solo ese job, como estaba previsto, y publicó. El arreglo
+de fondo es que el job espere a que npm sirva la versión antes de publicar.
 
 ### Qué dispara una versión
 
@@ -78,6 +75,28 @@ nada. Que `main` vaya adelante de npm por eso no es un olvido.
 ---
 
 ## Sigue abierto, dentro del repo
+
+### El logo del README no sigue el modo oscuro de npm
+
+Visto el 2026-09-28, con la 0.2.5 ya publicada. En GitHub el logo cambia bien
+de variante; en npm, con el modo oscuro de la página, sale la variante gris
+`#333333` sobre el fondo oscuro, y apenas se ve.
+
+Son dos causas. La de fondo: el modo oscuro de npm es un botón de la página, no
+el tema del sistema, y el `<picture>` elige variante con
+`prefers-color-scheme`, que mira el sistema. Ningún `<picture>` puede seguir
+ese botón. La otra: npm reescribe el `src` del `<img>` a
+`raw.githubusercontent.com/…/HEAD/…`, pero deja el `srcset` del `<source>`
+relativo, apuntando a una ruta de npmjs.com donde el archivo no existe.
+
+Lo segundo se arregla con URLs absolutas; `raw.githubusercontent.com` sirve los
+SVG como `image/svg+xml`, así que funcionan en los dos sitios. Lo primero solo
+se arregla con una imagen que se vea sobre cualquier fondo, por ejemplo el logo
+blanco sobre una tarjeta oscura propia. Es una decisión de diseño y queda para
+el autor.
+
+Cualquiera de los dos cambios llega a npm recién con la próxima versión, porque
+el README viaja en el tarball. Por sí solo no justifica publicar una.
 
 ### Las dos advisories `moderate` del `npm audit`
 

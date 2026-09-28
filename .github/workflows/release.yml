@@ -110,8 +110,9 @@ jobs:
 
       # El Registry acepta la versión solo si npm ya la sirve, y npm tarda: al
       # aceptar el publish avisa que el paquete «may take a few minutes to become
-      # available». Con la 0.2.5 fueron más de dos minutos, y tres reintentos de
-      # 20 s se agotaron antes. Por eso primero se espera a npm, hasta 10 minutos.
+      # available». Con la 0.2.5 fueron unos cuatro minutos y medio, y tres
+      # reintentos de 20 s se agotaron mucho antes. Por eso primero se espera a
+      # npm, hasta 10 minutos.
       - name: Esperar a que npm sirva la versión
         run: |
           URL="https://registry.npmjs.org/@cryptocapi%2Fmcp/${GITHUB_REF_NAME#v}"
