@@ -95,6 +95,29 @@ nada. Que `main` vaya adelante de npm por eso no es un olvido.
 
 ## Sigue abierto, dentro del repo
 
+### `get_insight` dice que la vista `pulse` es libre, y con la demo no lo es
+
+Visto el 2026-09-28, contrastando el `llms.txt` con el backend. La descripción
+que recibe el agente dice que `pulse` «es de acceso libre» y que con la key de
+demostración **alpha** funciona solo para bitcoin y ethereum. Se lee como que
+`pulse`, con la demo, sirve cualquier moneda. No es así, y por dos lados:
+
+- **La restricción es por moneda, no por vista.** Con la demo key, `pulse` de
+  solana da 403 `DEMO_COIN_RESTRICTED`, igual que alpha. Medido en producción.
+- **Con la demo, `pulse` no existe.** El backend fuerza la vista alpha para ese
+  plan, pida lo que pida (`insight.controller.ts`, rama `req.plan === 'demo'`):
+  `pulse` de bitcoin devuelve la respuesta alpha entera.
+
+«Libre» es cierto en otro sentido: con una key del plan free, `pulse` no exige
+pase. Sin ninguna key la ruta da 401.
+
+No rompe nada, porque el 403 llega traducido y nombra la restricción. Le cuesta
+un intento al agente que pide `pulse` de otra moneda confiando en la
+descripción. El arreglo es de texto: la descripción de `get_insight` y el
+`.describe` de `view` en [`src/tools.ts`](src/tools.ts), y la celda «`pulse`
+libre» de la tabla del README. Viaja en el tarball, así que sale con la próxima
+versión, y no la justifica por sí solo.
+
 ### Las dos advisories `moderate` del `npm audit`
 
 `hono` y `qs`, heredadas de `@modelcontextprotocol/sdk` vía `express` y
@@ -157,6 +180,21 @@ no puede hacer es corregir el texto del sitio.
 Hay además un desajuste menor y sin consecuencias: `llms.txt` recomienda «a client
 timeout of at least 15 s» y el paquete usa 20 s y 45 s según la herramienta. No se
 contradicen; la guía del sitio es la más floja de las dos.
+
+### Dos promesas de la API que el backend no cumple
+
+Encontradas el 2026-09-28 y anotadas donde se arreglan, en
+`docs/CORRECCIONES_ABIERTAS.md` del repo del sitio. Acá, lo que tocan del MCP:
+
+- **§3.24: el 403 de alpha para el plan free sale sin `code`.** Es muy
+  probablemente lo que recibe una key de trial vencida. El paquete no inventa
+  un código cuando falta, así que el agente recibe la frase sin la línea
+  `code:` de la que se le pide ramificar. Se arregla en el backend; acá no hay
+  nada que tocar.
+- **§3.25: un límite global de 1.000 pedidos cada 15 minutos por IP.** Corta a
+  4.000 por hora a un integrador PRO al que se le prometen 10.000. El MCP ya
+  traduce bien el 429; lo que falta es que el límite exista en la documentación
+  o deje de aplicarse a las keys autenticadas.
 
 ### El front no ofrece el MCP, solo la documentación
 
