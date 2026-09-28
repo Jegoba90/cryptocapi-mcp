@@ -43,24 +43,40 @@ estas ramas va a ver los ítems y merece saber cómo terminaron.
 
 ---
 
-## La 0.2.5 tiene contenido
+## La 0.2.5 salió el 2026-09-28
 
-La revisión del 2026-09-28 se resolvió publicando, no corriendo la fecha. Había
-quedado escrita la condición: si se hacían las `annotations`, ése era el
-contenido de la 0.2.5, porque viven en `src/tools.ts` y viajan en el tarball.
-Se hicieron. La 0.2.5 lleva:
+La revisión de ese día se resolvió publicando, no corriendo la fecha: las
+`annotations` viajan en el tarball, que era la condición que había quedado
+escrita. La versión lleva las `annotations` de los cuatro tools, el clamp del
+`setTimeout` que esperaba desde el 2026-09-23, el piso del SDK en `^1.31.0`, el
+README con el logo y la descripción nueva del Registry. Salió a npm con
+procedencia, atada al commit `8154167`, y al Registry por primera vez desde
+`release.yml`.
 
-- las `annotations` de los cuatro tools, que es lo que la justifica;
-- el clamp del `setTimeout` en [`src/config.ts`](src/config.ts), que esperaba
-  desde el 2026-09-23 porque solo no alcanzaba para publicar;
-- el piso del SDK en `^1.31.0`;
-- el README con el logo, que en la página de npm aparece recién con esta versión;
-- la descripción nueva del Registry, que por primera vez publica solo el job
-  `registry` de `release.yml`.
+**El job del Registry falló en el primer intento.** npm aceptó el publish
+avisando que el paquete «may take a few minutes to become available», y tardó
+unos cuatro minutos y medio en servirlo: los tres reintentos de 20 s se agotaron
+mucho antes. Se relanzó solo ese job, como estaba previsto, y publicó. El arreglo
+de fondo es que el job espere a que npm sirva la versión antes de publicar.
 
-**Dos cosas para mirar después de publicarla.** Que la página de npm muestre las
-imágenes del README, que van con ruta relativa. Y que el job `registry` haya
-corrido: si falló, npm ya quedó publicado y se reintenta solo ese job.
+### Decidido: en el modo oscuro de npm el logo se ve gris, y se deja así
+
+Visto con la 0.2.5 ya publicada. En GitHub el logo cambia bien de variante; en
+npm sale siempre la gris `#333333`, y con el modo oscuro de la página apenas se
+ve sobre el fondo `#1a1a1a`.
+
+**No tiene arreglo con el `<picture>`, y vale saberlo antes de intentarlo.** El
+renderer de npm lo desarma: deja el `<source>` solo, dentro de un `<picture>`
+vacío, y saca el `<img>` afuera, envuelto en un link a GitHub. La variante
+oscura no se usa nunca, con ningún tema. Pasar el `srcset` a URL absoluta no
+cambia nada, porque el `<source>` ya no tiene `<img>` al que aplicarse. Además,
+el modo oscuro de npm es un botón de la página y no sigue el tema del sistema,
+que es lo único que puede mirar un `<picture>`.
+
+Lo único que funciona en npm es una imagen que se vea sobre cualquier fondo, como
+el logo blanco sobre una tarjeta oscura propia. Se probó y se descartó el
+2026-09-28: el autor prefiere la portada actual en GitHub, que es donde se ve el
+repo, a cambiar su aspecto por el modo oscuro de npm.
 
 ### Qué dispara una versión
 
