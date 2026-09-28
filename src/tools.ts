@@ -21,10 +21,16 @@
  *    texto tal como cruzó el cable, nunca un objeto re-serializado: reformatear
  *    un float del `math_diagnostics` alcanza para que el `protocol_hash` deje de
  *    verificar, y ahí el producto incumple su única promesa.
+ *
+ *    Por eso tampoco hay `outputSchema` ni `structuredContent`, aunque el SDK
+ *    los soporte y parezcan lo moderno. `structuredContent` viaja como objeto y
+ *    el cliente lo re-serializa: un agente que calculara el sello desde ahí
+ *    obtendría un hash que no verifica, y en silencio, sin un error que lo
+ *    avise. No es un olvido, y un test lo fija para que nadie lo «arregle».
  */
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import type { CallToolResult, ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import { CryptoCapiClient, ApiRequestError, type ApiResponse } from './http.js';
 import { explainHttpError, explainRequestError } from './errors.js';
 
@@ -47,6 +53,25 @@ const BUDGET_MS = {
   /** Varios activos, o un recorrido del mercado entero. */
   motorPesado: 45_000,
 } as const;
+
+/**
+ * Las `annotations` de los cuatro tools, que son las mismas: todos leen de la
+ * API y no cambian nada, ni acá ni allá.
+ *
+ * Sin estas señales un cliente MCP estricto no puede aprobar las llamadas solo
+ * y le pregunta al usuario cada vez. No rompía nada, pero era fricción gratis
+ * de sacar.
+ *
+ * Según la especificación, `destructiveHint` e `idempotentHint` solo significan
+ * algo con `readOnlyHint` en false. Se declaran igual porque un cliente que las
+ * lea sueltas caería en sus defaults, y el de `destructiveHint` es true.
+ */
+const SOLO_LECTURA = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true,
+} as const satisfies ToolAnnotations;
 
 /**
  * Envuelve una llamada a la API en el contrato de salida del tool.
@@ -125,6 +150,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
           .optional()
           .describe('Motor que firma el análisis. Por defecto "radar".'),
       },
+      annotations: SOLO_LECTURA,
     },
     async ({ coin_id, view, engine }) =>
       respond(() => client.get(`/market/insights/${encodeURIComponent(coin_id)}`, { view, engine }, BUDGET_MS.motor))
@@ -149,6 +175,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
           .max(20)
           .describe('Par de trading, por ejemplo "BTCUSDT" o "ETHUSDT". No "bitcoin".'),
       },
+      annotations: SOLO_LECTURA,
     },
     async ({ symbol }) =>
       respond(() => client.get(`/quant/${encodeURIComponent(symbol.toUpperCase())}/signal`, undefined, BUDGET_MS.motor))
@@ -177,6 +204,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
               'es del pedido, no de las señales disponibles.'
           ),
       },
+      annotations: SOLO_LECTURA,
     },
     async ({ symbols }) => respond(() => client.post('/quant/batch', { symbols }, BUDGET_MS.motorPesado))
   );
@@ -207,6 +235,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
               'si el universo rankeado es menor, vuelven menos.'
           ),
       },
+      annotations: SOLO_LECTURA,
     },
     async ({ strategy, limit }) =>
       respond(() => client.get('/quant/market-scan', { strategy, limit }, BUDGET_MS.motorPesado))

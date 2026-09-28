@@ -78,6 +78,40 @@ test('expone exactamente los cuatro motores, y nada más', async () => {
   }
 });
 
+test('los cuatro se declaran de solo lectura, para que el cliente no pregunte cada vez', async () => {
+  // Sin estas annotations un cliente MCP estricto le pide permiso al usuario en
+  // cada llamada. Se compara el objeto entero: perder una sola cae en el default
+  // de la especificación, y el de destructiveHint es true.
+  const { client, close } = await withServer({});
+  try {
+    const { tools } = await client.listTools();
+    for (const tool of tools) {
+      assert.deepEqual(
+        tool.annotations,
+        { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+        `${tool.name} perdió sus annotations`
+      );
+    }
+  } finally {
+    await close();
+  }
+});
+
+test('ninguno declara outputSchema: el sello solo verifica sobre el texto verbatim', async () => {
+  // Con outputSchema el SDK exige structuredContent, que viaja como objeto y el
+  // cliente re-serializa. Un hash calculado desde ahí no verifica, y en silencio.
+  // Parece una feature que falta; es una decisión. Ver la cabecera de src/tools.ts.
+  const { client, close } = await withServer({});
+  try {
+    const { tools } = await client.listTools();
+    for (const tool of tools) {
+      assert.equal(tool.outputSchema, undefined, `${tool.name} declara outputSchema`);
+    }
+  } finally {
+    await close();
+  }
+});
+
 test('el cuerpo se reenvía verbatim: ni un byte distinto', async () => {
   const { client, close } = await withServer({
     '/v1/market/insights/bitcoin?view=alpha': { status: 200, body: INSIGHT_FIXTURE },
