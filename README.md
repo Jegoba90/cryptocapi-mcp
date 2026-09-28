@@ -1,13 +1,41 @@
-# @cryptocapi/mcp
+<p align="center">
+  <a href="https://cryptocapi.com">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/cryptocapi-logo-dark.svg">
+      <img src=".github/assets/cryptocapi-logo-light.svg" alt="CryptoCapi · MCP server" width="400">
+    </picture>
+  </a>
+</p>
 
-[![npm](https://img.shields.io/npm/v/@cryptocapi/mcp)](https://www.npmjs.com/package/@cryptocapi/mcp)
-[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.Jegoba90%2Fcryptocapi-blue)](https://registry.modelcontextprotocol.io)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+<p align="center">
+  <b>Análisis de mercado cripto con sello verificable</b>, como herramientas nativas para cualquier agente que hable MCP.<br>
+  Cada respuesta viaja con el SHA-256 de sus inputs, así que el análisis se puede <b>recalcular y comprobar</b> — no hay que creerle al modelo.
+</p>
 
-Análisis de mercado cripto **con sello verificable**, como herramientas nativas
-para cualquier agente que hable MCP. Cada respuesta viaja con el SHA-256 de sus
-inputs, así que el análisis se puede **recalcular y comprobar** — no hay que
-creerle al modelo.
+<p align="center">
+  <a href="https://www.npmjs.com/package/@cryptocapi/mcp"><img alt="npm" src="https://img.shields.io/npm/v/@cryptocapi/mcp?style=flat-square&logo=npm&logoColor=white&label=npm&labelColor=333333&color=007bff"></a>
+  <a href="https://registry.modelcontextprotocol.io"><img alt="MCP Registry" src="https://img.shields.io/badge/MCP%20Registry-io.github.Jegoba90%2Fcryptocapi-007bff?style=flat-square&labelColor=333333"></a>
+  <a href="https://github.com/Jegoba90/cryptocapi-mcp/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Jegoba90/cryptocapi-mcp/ci.yml?branch=main&style=flat-square&logo=githubactions&logoColor=white&label=CI&labelColor=333333"></a>
+  <a href="https://github.com/Jegoba90/cryptocapi-mcp/actions/workflows/contrato.yml"><img alt="Contrato con la API real" src="https://img.shields.io/github/actions/workflow/status/Jegoba90/cryptocapi-mcp/contrato.yml?branch=main&style=flat-square&label=contrato%20con%20la%20API&labelColor=333333"></a>
+  <a href="package.json"><img alt="Node" src="https://img.shields.io/node/v/@cryptocapi/mcp?style=flat-square&logo=nodedotjs&logoColor=white&label=node&labelColor=333333&color=007bff"></a>
+  <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-007bff?style=flat-square&labelColor=333333"></a>
+</p>
+
+<p align="center">
+  <a href="#pegá-esto-y-ya-funciona">Empezar</a>
+  &nbsp;·&nbsp;
+  <a href="#cuatro-herramientas-cuatro-motores">Herramientas</a>
+  &nbsp;·&nbsp;
+  <a href="#probarlo-sin-registrarte">Demo</a>
+  &nbsp;·&nbsp;
+  <a href="#qué-lo-diferencia">Verificar el sello</a>
+  &nbsp;·&nbsp;
+  <a href="#configuración">Configuración</a>
+  &nbsp;·&nbsp;
+  <a href="https://cryptocapi.com">cryptocapi.com</a>
+</p>
+
+<br>
 
 ## Pegá esto y ya funciona
 
@@ -41,7 +69,14 @@ llega la demo está [más abajo](#probarlo-sin-registrarte).
 
 Son cinco filas para cuatro herramientas porque **`get_insight` es la puerta de dos motores**, y cada uno pide su propio pase. Tener Radar Alpha no abre Quant Plus por ese mismo tool: cambia el parámetro `engine` y cambia el pase que se exige.
 
+<details>
+<summary><b>¿Y <code>get_market_summary</code>, <code>get_prices</code> y <code>get_macro</code>?</b></summary>
+
+<br>
+
 **Hasta el 2026-08-30 había tres herramientas más** (`get_market_summary`, `get_prices`, `get_macro`) que devolvían dato de terceros: capitalización y miedo y codicia, precios de CoinGecko y series macro de FRED. Se retiraron porque CryptoCapi no es un agregador: sus motores firman inteligencia derivada y el dato ajeno es insumo interno. Un agente que preguntaba «¿cómo está el mercado?» agarraba el resumen y se iba con dato de terceros sin tocar un motor. Esos endpoints siguen existiendo en la API REST; lo que se retiró es que el agente los vea como herramientas.
+
+</details>
 
 **Cada motor se compra por separado, así que tener uno no habilita los otros.** Las descripciones nombran el motor que hace falta, no un «PRO» genérico, para que el agente no gaste intentos en herramientas que su clave no abre. Cuando igual las intenta, el error le dice qué pase falta y cuál sí tiene, en vez de un 403 pelado.
 
@@ -172,4 +207,14 @@ El workflow comprueba primero que el tag coincida con la versión del `package.j
 
 ## Licencia
 
-MIT
+[MIT](LICENSE)
+
+<br>
+
+<p align="center">
+  <a href="https://cryptocapi.com"><b>cryptocapi.com</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://www.npmjs.com/package/@cryptocapi/mcp">npm</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/Jegoba90/cryptocapi-mcp/issues">Issues</a>
+</p>
