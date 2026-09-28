@@ -22,6 +22,7 @@ usabilidad para agentes cierra con la 0.2.5.
 | SDK un patch atrás | `1.30.0` → `1.31.0`. El rango `^1.30.0` ya se la instalaba a los usuarios: ahora los tests corren contra lo mismo |
 | El MCP Registry anunciaba la 0.2.3 | La 0.2.4 se publicó a mano, y desde `440f617` el tag publica en el Registry desde `release.yml` |
 | La descripción del Registry decía «PRO» | Cambiada en `server.json`; llega al Registry con la 0.2.5 |
+| El `llms.txt` del sitio decía que `/v1/quant/*` pide key PRO, y `batch` no | Corregido en el repo del sitio (`38f83131`), junto con el recuadro de `/docs/agentes` que decía lo mismo en castellano. Desplegado y verificado en producción: el `llms.txt` publicado es el del repo y el espejo `.md` de la guía nombra `batch_signals`. La guía de timeout de 15 s quedó como estaba: es más floja que la del paquete, no la contradice |
 
 ## Cerrado el 2026-09-23
 
@@ -147,39 +148,6 @@ reportó roto. **La decisión queda escrita, no tomada.**
 ## Fuera de este repo: cryptocapi.com
 
 Lo más valioso que quedó abierto, y no se arregla acá.
-
-### `llms.txt` dice que `/v1/quant/*` pide key PRO, y `batch` no
-
-El texto publicado en https://www.cryptocapi.com/llms.txt afirma:
-
-> Demo key (no signup): `demo_btc_eth_public` — works ONLY on
-> `/v1/market/insights/{bitcoin|ethereum}` (…; `/v1/quant/*` requires a real PRO key).
-
-Medido contra producción el 2026-09-23, la última parte es falsa para `batch`:
-
-```
-POST /v1/quant/batch  {"symbols":["bitcoin","ethereum"]}  con demo_btc_eth_public
-  -> HTTP 200, señales reales de bitcoin y ethereum
-```
-
-Para `get_signal` y `scan_market` la frase **sí** es correcta: las dos devuelven
-403 `PRODUCT_NOT_INCLUDED`.
-
-El backend abrió `batch` a la demo key y este paquete lo documentó en la 0.2.2
-(commit `08b5077`). El `llms.txt` no se actualizó con ese cambio.
-
-**Por qué importa más que un typo:** `llms.txt` es lo que leen los agentes. Uno
-que lo lea concluye que `batch_signals` está cerrado con la demo key y no lo
-intenta — exactamente el fallo que la 0.2.2 arregló del lado del MCP, reaparecido
-del lado del sitio.
-
-Desde el 2026-09-23 el chequeo de contrato de este repo verifica esa afirmación
-todos los días, así que si el backend revierte la excepción nos enteramos. Lo que
-no puede hacer es corregir el texto del sitio.
-
-Hay además un desajuste menor y sin consecuencias: `llms.txt` recomienda «a client
-timeout of at least 15 s» y el paquete usa 20 s y 45 s según la herramienta. No se
-contradicen; la guía del sitio es la más floja de las dos.
 
 ### Dos promesas de la API que el backend no cumple
 
