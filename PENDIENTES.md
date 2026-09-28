@@ -59,6 +59,25 @@ unos cuatro minutos y medio en servirlo: los tres reintentos de 20 s se agotaron
 mucho antes. Se relanzó solo ese job, como estaba previsto, y publicó. El arreglo
 de fondo es que el job espere a que npm sirva la versión antes de publicar.
 
+### Decidido: en el modo oscuro de npm el logo se ve gris, y se deja así
+
+Visto con la 0.2.5 ya publicada. En GitHub el logo cambia bien de variante; en
+npm sale siempre la gris `#333333`, y con el modo oscuro de la página apenas se
+ve sobre el fondo `#1a1a1a`.
+
+**No tiene arreglo con el `<picture>`, y vale saberlo antes de intentarlo.** El
+renderer de npm lo desarma: deja el `<source>` solo, dentro de un `<picture>`
+vacío, y saca el `<img>` afuera, envuelto en un link a GitHub. La variante
+oscura no se usa nunca, con ningún tema. Pasar el `srcset` a URL absoluta no
+cambia nada, porque el `<source>` ya no tiene `<img>` al que aplicarse. Además,
+el modo oscuro de npm es un botón de la página y no sigue el tema del sistema,
+que es lo único que puede mirar un `<picture>`.
+
+Lo único que funciona en npm es una imagen que se vea sobre cualquier fondo, como
+el logo blanco sobre una tarjeta oscura propia. Se probó y se descartó el
+2026-09-28: el autor prefiere la portada actual en GitHub, que es donde se ve el
+repo, a cambiar su aspecto por el modo oscuro de npm.
+
 ### Qué dispara una versión
 
 Cualquiera de estas tres, sin esperar a una revisión:
@@ -75,28 +94,6 @@ nada. Que `main` vaya adelante de npm por eso no es un olvido.
 ---
 
 ## Sigue abierto, dentro del repo
-
-### El logo del README no sigue el modo oscuro de npm
-
-Visto el 2026-09-28, con la 0.2.5 ya publicada. En GitHub el logo cambia bien
-de variante; en npm, con el modo oscuro de la página, sale la variante gris
-`#333333` sobre el fondo oscuro, y apenas se ve.
-
-Son dos causas. La de fondo: el modo oscuro de npm es un botón de la página, no
-el tema del sistema, y el `<picture>` elige variante con
-`prefers-color-scheme`, que mira el sistema. Ningún `<picture>` puede seguir
-ese botón. La otra: npm reescribe el `src` del `<img>` a
-`raw.githubusercontent.com/…/HEAD/…`, pero deja el `srcset` del `<source>`
-relativo, apuntando a una ruta de npmjs.com donde el archivo no existe.
-
-Lo segundo se arregla con URLs absolutas; `raw.githubusercontent.com` sirve los
-SVG como `image/svg+xml`, así que funcionan en los dos sitios. Lo primero solo
-se arregla con una imagen que se vea sobre cualquier fondo, por ejemplo el logo
-blanco sobre una tarjeta oscura propia. Es una decisión de diseño y queda para
-el autor.
-
-Cualquiera de los dos cambios llega a npm recién con la próxima versión, porque
-el README viaja en el tarball. Por sí solo no justifica publicar una.
 
 ### Las dos advisories `moderate` del `npm audit`
 
