@@ -194,16 +194,18 @@ Lo que se encontró y todavía no se arregló vive en [PENDIENTES.md](PENDIENTES
 
 ### Publicar
 
-Se dispara con un tag y publica desde CI con procedencia:
+Se dispara con un tag y publica desde CI con procedencia, en npm y en el MCP Registry:
 
 ```bash
-npm version <patch|minor|major>   # y commitear
+npm version <patch|minor|major>   # subir también las dos versiones de server.json, y commitear
 git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
 ```
 
-El workflow comprueba primero que el tag coincida con la versión del `package.json`, porque **en npm una versión no se puede reusar** y ese error no se deshace. La autenticación es *trusted publishing* por OIDC, sin token: está atada al nombre de `release.yml`, así que renombrar ese archivo rompe la publicación.
+El workflow comprueba primero que el tag coincida con la versión del `package.json` y con las dos de `server.json`, porque **en npm una versión no se puede reusar** y ese error no se deshace. La autenticación es *trusted publishing* por OIDC, sin token: está atada al nombre de `release.yml`, así que renombrar ese archivo rompe la publicación.
 
-`npm version` es la única fuente de la versión: el servidor lee el `package.json` publicado para declarar su `serverInfo.version`, y un test del handshake falla si los dos números se separan. No hay ningún literal que actualizar a mano.
+Con npm arriba, un segundo job le manda el `server.json` al Registry, también por OIDC. Va aparte para que, si el Registry falla, «Re-run failed jobs» reintente solo eso sin volver a pasar por `npm publish`.
+
+Para el servidor, `npm version` es la única fuente de la versión: lee el `package.json` publicado para declarar su `serverInfo.version`, y un test del handshake falla si los dos números se separan. El único literal a mano es el de `server.json`, y si queda atrás el tag no pasa la primera comprobación.
 
 ## Licencia
 
