@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.Jegoba90/cryptocapi",
-  "description": "Análisis de riesgo cripto: cada insight PRO trae el SHA-256 de sus inputs para que lo recalcules.",
+  "description": "Análisis de mercado cripto con sello verificable: cada respuesta trae el SHA-256 de sus inputs.",
   "repository": {
     "url": "https://github.com/Jegoba90/cryptocapi-mcp",
     "source": "github"

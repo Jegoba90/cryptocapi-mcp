@@ -84,3 +84,44 @@ jobs:
       # publish deja de autenticar.
       - name: npm publish
         run: npm publish --access public --provenance
+
+  # El MCP Registry no se entera solo de una versión nueva en npm: hay que
+  # mandarle el server.json. Era un paso a mano y se olvidó con la 0.2.4, que
+  # estuvo cinco días en npm mientras el Registry seguía anunciando la 0.2.3.
+  #
+  # Va en un job aparte a propósito. Si el Registry falla, «Re-run failed jobs»
+  # reintenta solo esto; en el mismo job el reintento volvería a pasar por
+  # `npm publish`, y npm rechaza una versión que ya existe.
+  registry:
+    name: Publicar en el MCP Registry
+    needs: publicar
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      # Versión fija y checksum verificado, por lo mismo que la imagen fija: un
+      # binario que baja de «latest» cambia sin que nadie lo decida.
+      - name: Instalar mcp-publisher 1.8.1
+        run: |
+          curl -fsSL -o mcp-publisher.tar.gz \
+            https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz
+          echo "a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc  mcp-publisher.tar.gz" | sha256sum -c -
+          tar xzf mcp-publisher.tar.gz mcp-publisher
+
+      # Sin token, con el mismo `id-token: write` que usa npm: el Registry
+      # acepta el OIDC de un workflow de este dueño para el namespace
+      # io.github.Jegoba90.
+      - name: Login con el OIDC del workflow
+        run: ./mcp-publisher login github-oidc
+
+      # El Registry acepta la versión solo si el paquete ya está en npm con el
+      # mismo mcpName, y npm puede tardar unos segundos en servir lo que se
+      # acaba de publicar. Tres intentos antes de dar el job por fallido.
+      - name: Publicar server.json
+        run: |
+          for intento in 1 2 3; do
+            ./mcp-publisher publish && exit 0
+            echo "Intento $intento falló; reintento en 20 s."
+            sleep 20
+          done
+          exit 1
