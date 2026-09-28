@@ -108,15 +108,32 @@ jobs:
           echo "a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc  mcp-publisher.tar.gz" | sha256sum -c -
           tar xzf mcp-publisher.tar.gz mcp-publisher
 
+      # El Registry acepta la versión solo si npm ya la sirve, y npm tarda: al
+      # aceptar el publish avisa que el paquete «may take a few minutes to become
+      # available». Con la 0.2.5 fueron más de dos minutos, y tres reintentos de
+      # 20 s se agotaron antes. Por eso primero se espera a npm, hasta 10 minutos.
+      - name: Esperar a que npm sirva la versión
+        run: |
+          URL="https://registry.npmjs.org/@cryptocapi%2Fmcp/${GITHUB_REF_NAME#v}"
+          for intento in $(seq 1 40); do
+            if [ "$(curl -s -o /dev/null -w '%{http_code}' "$URL")" = 200 ]; then
+              echo "npm sirve ${GITHUB_REF_NAME#v}."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "npm no sirve ${GITHUB_REF_NAME#v} después de 10 minutos."
+          exit 1
+
       # Sin token, con el mismo `id-token: write` que usa npm: el Registry
       # acepta el OIDC de un workflow de este dueño para el namespace
-      # io.github.Jegoba90.
+      # io.github.Jegoba90. Va después de la espera porque la sesión que emite
+      # es corta, y podría vencer mientras npm termina de procesar.
       - name: Login con el OIDC del workflow
         run: ./mcp-publisher login github-oidc
 
-      # El Registry acepta la versión solo si el paquete ya está en npm con el
-      # mismo mcpName, y npm puede tardar unos segundos en servir lo que se
-      # acaba de publicar. Tres intentos antes de dar el job por fallido.
+      # Con npm ya sirviendo la versión, los reintentos cubren lo que queda: que
+      # el Registry consulte a npm por otro nodo que todavía no se enteró.
       - name: Publicar server.json
         run: |
           for intento in 1 2 3; do
