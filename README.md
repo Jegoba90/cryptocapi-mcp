@@ -1,8 +1,8 @@
 <p align="center">
   <a href="https://cryptocapi.com">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/cryptocapi-dark.svg">
-      <img src=".github/assets/cryptocapi-light.svg" alt="CryptoCapi · MCP server" width="400">
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/cryptocapi-logo-dark.svg">
+      <img src=".github/assets/cryptocapi-logo-light.svg" alt="CryptoCapi · MCP server" width="400">
     </picture>
   </a>
 </p>
