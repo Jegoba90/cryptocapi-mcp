@@ -22,6 +22,7 @@ usabilidad para agentes cierra con la 0.2.5.
 | SDK un patch atrás | `1.30.0` → `1.31.0`. El rango `^1.30.0` ya se la instalaba a los usuarios: ahora los tests corren contra lo mismo |
 | El MCP Registry anunciaba la 0.2.3 | La 0.2.4 se publicó a mano, y desde `440f617` el tag publica en el Registry desde `release.yml` |
 | La descripción del Registry decía «PRO» | Cambiada en `server.json`; llega al Registry con la 0.2.5 |
+| El `llms.txt` del sitio decía que `/v1/quant/*` pide key PRO, y `batch` no | Corregido en el repo del sitio (`38f83131`), junto con el recuadro de `/docs/agentes` que decía lo mismo en castellano. Desplegado y verificado en producción: el `llms.txt` publicado es el del repo y el espejo `.md` de la guía nombra `batch_signals`. La guía de timeout de 15 s quedó como estaba: es más floja que la del paquete, no la contradice |
 
 ## Cerrado el 2026-09-23
 
@@ -95,6 +96,29 @@ nada. Que `main` vaya adelante de npm por eso no es un olvido.
 
 ## Sigue abierto, dentro del repo
 
+### `get_insight` dice que la vista `pulse` es libre, y con la demo no lo es
+
+Visto el 2026-09-28, contrastando el `llms.txt` con el backend. La descripción
+que recibe el agente dice que `pulse` «es de acceso libre» y que con la key de
+demostración **alpha** funciona solo para bitcoin y ethereum. Se lee como que
+`pulse`, con la demo, sirve cualquier moneda. No es así, y por dos lados:
+
+- **La restricción es por moneda, no por vista.** Con la demo key, `pulse` de
+  solana da 403 `DEMO_COIN_RESTRICTED`, igual que alpha. Medido en producción.
+- **Con la demo, `pulse` no existe.** El backend fuerza la vista alpha para ese
+  plan, pida lo que pida (`insight.controller.ts`, rama `req.plan === 'demo'`):
+  `pulse` de bitcoin devuelve la respuesta alpha entera.
+
+«Libre» es cierto en otro sentido: con una key del plan free, `pulse` no exige
+pase. Sin ninguna key la ruta da 401.
+
+No rompe nada, porque el 403 llega traducido y nombra la restricción. Le cuesta
+un intento al agente que pide `pulse` de otra moneda confiando en la
+descripción. El arreglo es de texto: la descripción de `get_insight` y el
+`.describe` de `view` en [`src/tools.ts`](src/tools.ts), y la celda «`pulse`
+libre» de la tabla del README. Viaja en el tarball, así que sale con la próxima
+versión, y no la justifica por sí solo.
+
 ### Las dos advisories `moderate` del `npm audit`
 
 `hono` y `qs`, heredadas de `@modelcontextprotocol/sdk` vía `express` y
@@ -125,67 +149,56 @@ reportó roto. **La decisión queda escrita, no tomada.**
 
 Lo más valioso que quedó abierto, y no se arregla acá.
 
-### `llms.txt` dice que `/v1/quant/*` pide key PRO, y `batch` no
+### Dos promesas de la API que el backend no cumple
 
-El texto publicado en https://www.cryptocapi.com/llms.txt afirma:
+Encontradas el 2026-09-28 y anotadas donde se arreglan, en
+`docs/CORRECCIONES_ABIERTAS.md` del repo del sitio. Acá, lo que tocan del MCP:
 
-> Demo key (no signup): `demo_btc_eth_public` — works ONLY on
-> `/v1/market/insights/{bitcoin|ethereum}` (…; `/v1/quant/*` requires a real PRO key).
+- **§3.24: el 403 de alpha para el plan free sale sin `code`.** Es muy
+  probablemente lo que recibe una key de trial vencida. El paquete no inventa
+  un código cuando falta, así que el agente recibe la frase sin la línea
+  `code:` de la que se le pide ramificar. Se arregla en el backend; acá no hay
+  nada que tocar.
+- **§3.25: un límite global de 1.000 pedidos cada 15 minutos por IP.** Corta a
+  4.000 por hora a un integrador PRO al que se le prometen 10.000. El MCP ya
+  traduce bien el 429; lo que falta es que el límite exista en la documentación
+  o deje de aplicarse a las keys autenticadas.
 
-Medido contra producción el 2026-09-23, la última parte es falsa para `batch`:
-
-```
-POST /v1/quant/batch  {"symbols":["bitcoin","ethereum"]}  con demo_btc_eth_public
-  -> HTTP 200, señales reales de bitcoin y ethereum
-```
-
-Para `get_signal` y `scan_market` la frase **sí** es correcta: las dos devuelven
-403 `PRODUCT_NOT_INCLUDED`.
-
-El backend abrió `batch` a la demo key y este paquete lo documentó en la 0.2.2
-(commit `08b5077`). El `llms.txt` no se actualizó con ese cambio.
-
-**Por qué importa más que un typo:** `llms.txt` es lo que leen los agentes. Uno
-que lo lea concluye que `batch_signals` está cerrado con la demo key y no lo
-intenta — exactamente el fallo que la 0.2.2 arregló del lado del MCP, reaparecido
-del lado del sitio.
-
-Desde el 2026-09-23 el chequeo de contrato de este repo verifica esa afirmación
-todos los días, así que si el backend revierte la excepción nos enteramos. Lo que
-no puede hacer es corregir el texto del sitio.
-
-Hay además un desajuste menor y sin consecuencias: `llms.txt` recomienda «a client
-timeout of at least 15 s» y el paquete usa 20 s y 45 s según la herramienta. No se
-contradicen; la guía del sitio es la más floja de las dos.
-
-### El front no ofrece el MCP, solo la documentación
+### La portada nombra el MCP, pero no trae el JSON para instalarlo
 
 Decisión de producto, no defecto. Queda anotada porque el argumento es concreto.
 
-El MCP es **el único camino al producto que funciona sin registro**: seis líneas
-de JSON y el visitante tiene un análisis firmado de Bitcoin dentro de su agente.
-Verificado de punta a punta el 2026-09-23 contra la 0.2.4 publicada, con hash
-idéntico al de la API.
+Esta nota decía antes que el front no ofrecía el MCP, sin haberlo podido
+verificar: la SPA devuelve el mismo HTML en todas las rutas. **Era falso en
+parte.** Leído en `frontend/src/features/home/home.html` del repo del sitio el
+2026-09-28, la portada hoy:
 
-La documentación la lee quien ya decidió integrar; el front lo lee quien todavía
-está decidiendo si le importa. Dejar la demo de fricción cero detrás de la docu
-hace que **la prueba más fuerte solo la vea quien ya está convencido.**
+- dice en el hero «REST y MCP nativo, gratis para empezar»;
+- explica el MCP nativo en la sección «Conectalo vos, o que lo haga tu agente»,
+  con un chip «MCP nativo» que lleva a `/docs/agentes#mcp`;
+- trae un bloque para pegarle a un agente de código, que le pide leer el
+  `llms.txt` y usar la demo key.
 
-Y el diferenciador es difícil de explicar en prosa —«un checksum que prueba que el
-cálculo es reproducible y no lo escribió un LLM»— pero fácil de mostrar. El MCP es
-el mecanismo para mostrarlo.
+**Lo que falta es el JSON.** Para instalar el MCP hay que ir hasta la guía, así
+que la decisión que queda es chica: si vale ahorrar ese clic con el bloque de
+configuración en la portada.
 
-Hay un contraargumento real: si el cliente ideal es el integrador que compra REST,
-el MCP es un canal lateral y el front tiene que quedarse enfocado. Las home mueren
-por exceso de llamadas a la acción. El `<title>` del sitio ya dice «señales cripto
-verificables para apps y agentes», así que el posicionamiento no falta: falta la
-rampa concreta.
+A favor: el MCP es **el único camino al producto que funciona sin registro**.
+Seis líneas de JSON y el visitante tiene un análisis firmado de Bitcoin dentro de
+su agente; verificado de punta a punta el 2026-09-23 contra la 0.2.4, con hash
+idéntico al de la API. La documentación la lee quien ya decidió integrar, y la
+portada quien todavía está decidiendo. El sello cuesta explicarlo en prosa y se
+entiende al verlo funcionar.
 
-Propuesta mínima, si se decide hacerlo: no una sección sino **un bloque**, con el
-mismo JSON que ya vive en el `llms.txt` y en el README, cerca del CTA principal y
-con una línea encima del estilo «Pegá esto en tu agente y pedile el análisis de
-Bitcoin. Sin cuenta.»
+En contra: si el cliente ideal es el integrador que compra REST, el MCP es un
+canal lateral, y las portadas se mueren por exceso de llamadas a la acción. La
+portada ya tiene dos rampas para agentes, el chip y el bloque del prompt; una
+tercera compite con ellas.
 
-> No se pudo verificar desde el repo qué muestra hoy el front: `cryptocapi.com` y
-> `/docs/agentes` devuelven el mismo HTML byte a byte, porque es una SPA y el
-> contenido se arma en el cliente. Lo de arriba asume lo que reportó el autor.
+Propuesta mínima, si se decide hacerlo: no una sección nueva sino el JSON
+**dentro** de la sección de integración que ya existe, junto al chip, con una
+línea del estilo «Pegá esto en tu agente y pedile el análisis de Bitcoin. Sin
+cuenta.»
+
+Y un motivo más para cuidar el `llms.txt`: el bloque del prompt de la portada
+manda a leerlo, así que lo que diga mal la portada lo multiplica.
