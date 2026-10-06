@@ -19,6 +19,7 @@ usabilidad para agentes cierra con la 0.2.5.
 | :--- | :--- |
 | `get_insight` decía que el `z_score` mide «el MOVIMIENTO de hoy» | Desde la v2.3.0 de los motores es el del último día cerrado (UTC), y desde la v2.4.0 el régimen lee ese mismo día. La descripción ahora lo dice, con el ejemplo corregido («un nivel alto después de un día que cerró con una caída fuerte»), y suma que las stablecoins se leen por la distancia de su último cierre al dólar y no por el `z_score` |
 | `get_insight` decía que la vista `pulse` es libre, y con la demo no lo es | La restricción de la demo es por moneda, no por vista, y el backend le responde siempre alpha. Corregidos la descripción de `get_insight`, el `.describe` de `view`, las dos celdas del README y dos comentarios de `src/tools.ts`, que decían que `pulse` responde sin credencial (sin key la ruta da 401) |
+| Las advisories de `hono` y `qs`, y el release de la 0.2.6 frenado por el audit | El tag `v0.2.6` frenó en `npm run check`, antes de publicar: el árbol del SDK sumó `proxy-addr` 2.0.7 (critical) y `fast-uri` 3.1.6 (high), publicadas después de la 0.2.5. `npm audit fix` sin `--force` sube cinco paquetes de producción dentro de su rango, sin agregar ni quitar ninguno: `fast-uri` 3.1.8, `proxy-addr` 2.0.8, `hono` 4.13.13, `ip-address` 10.7.3 y `qs` 6.16.0. El audit queda en 0, así que también cierran las dos moderate de `hono` y `qs` que se esperaba que arreglara el SDK. Regenerado y verificado en `node:24` (`npm ci` y `npm run check` completo). El lockfile no viaja en el tarball: quien instala el paquete ya resolvía estas versiones por rango |
 
 ## Cerrado el 2026-09-28
 
@@ -102,19 +103,6 @@ nada. Que `main` vaya adelante de npm por eso no es un olvido.
 ---
 
 ## Sigue abierto, dentro del repo
-
-### Las dos advisories `moderate` del `npm audit`
-
-`hono` y `qs`, heredadas de `@modelcontextprotocol/sdk` vía `express` y
-`@hono/node-server`. Quedan bajo la reja de `--audit-level=high`, así que el CI
-está en verde legítimamente: **este paquete solo importa `server/mcp.js` y
-`server/stdio.js`, de modo que el código vulnerable nunca se carga.**
-
-Más que una acción pendiente es contexto: vale saberlo para no asustarse al leer
-el `npm audit`, y sobre todo para **no "arreglarlo"** forzando resoluciones que
-romperían el SDK. Se cierra solo cuando el SDK actualice su árbol.
-
-No hay `dependabot.yml`. Si se quiere que esto se vigile solo, es el lugar.
 
 ### Lo que el chequeo de contrato no alcanza
 
