@@ -105,16 +105,18 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
   // motor. Con cuatro, todas llevan a lo que el producto vende.
   //
   // El argumento para tenerlos era que la primera sesión sin API key no fuera
-  // una pared. Ese argumento sigue cubierto sin ellos: `get_insight` en vista
-  // `pulse` responde sin credencial, y es una puerta mejor, porque lo que
-  // devuelve es un motor propio y no el precio de CoinGecko.
+  // una pared. Ese argumento sigue cubierto sin ellos: `get_insight` responde
+  // con la key de demostración, que el paquete usa si no se configura otra, y
+  // es una puerta mejor, porque lo que devuelve es un motor propio y no el
+  // precio de CoinGecko.
   //
   // Los endpoints siguen existiendo en la API REST para el front y para quien
   // los integre; lo que se retira es que el agente los vea como herramientas.
   // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
-  // Radar: la vista pulse es libre; alpha es la que trae el sello y exige pase.
+  // Radar: la vista pulse no exige pase con una key free; alpha trae el sello y
+  // exige pase. Con la demo, el backend responde siempre alpha (PENDIENTES).
   // ---------------------------------------------------------------------------
 
   server.registerTool(
@@ -123,10 +125,12 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
       title: 'Análisis de un activo',
       description:
         'Análisis de un activo con el motor determinista de CryptoCapi. La vista "pulse" ' +
-        'es de acceso libre. La vista "alpha" trae el análisis profundo con el audit_trail ' +
-        'y su protocol_hash, que es el sello del cálculo, y requiere el pase Radar Alpha ' +
-        '(o Quant Plus si se pide engine="quant_plus"). Con la key pública de demostración, ' +
-        'alpha funciona solo para bitcoin y ethereum. ' +
+        'no exige pase con una key del plan free. La vista "alpha" trae el análisis profundo ' +
+        'con el audit_trail y su protocol_hash, que es el sello del cálculo, y requiere el pase ' +
+        'Radar Alpha (o Quant Plus si se pide engine="quant_plus"). Con la key pública de ' +
+        'demostración, que es la que se usa si no se configura otra, solo responden bitcoin y ' +
+        'ethereum, en cualquier vista, y la respuesta es siempre la alpha: otra moneda da 403 ' +
+        'aunque se pida "pulse". ' +
         'Al leer la respuesta: `z_score` mide el MOVIMIENTO del último día cerrado (UTC), no el ' +
         'del día en curso, contra los movimientos pasados, y la posición en Bandas de Bollinger ' +
         'mide el NIVEL de precio contra su rango. Son ejes distintos: precio en el tercio ' +
@@ -145,7 +149,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         view: z
           .enum(['pulse', 'alpha'])
           .optional()
-          .describe('"pulse" es libre; "alpha" trae el sello y requiere pase. Por defecto "pulse".'),
+          .describe('"pulse" no exige pase con una key free; "alpha" trae el sello y requiere pase. Con la key de demostración la respuesta es siempre alpha. Por defecto "pulse".'),
         engine: z
           .enum(['radar', 'quant_plus'])
           .optional()

@@ -61,7 +61,7 @@ llega la demo está [más abajo](#probarlo-sin-registrarte).
 
 | Herramienta | Motor | Qué devuelve | Qué requiere |
 |---|---|---|---|
-| `get_insight` | **Radar** | Análisis de un activo. La vista `alpha` trae el sello | `pulse` libre · `alpha` requiere pase **Radar Alpha** |
+| `get_insight` | **Radar** | Análisis de un activo. La vista `alpha` trae el sello | `pulse` sin pase con una key free · `alpha` requiere pase **Radar Alpha** |
 | `get_insight` con `engine="quant_plus"` | **Quant Plus** | El mismo activo firmado por el motor determinista, con sello `reproducible` | Pase **Quant Plus** |
 | `batch_signals` | **Quant Plus** | Señales de varios activos en una llamada | Pase **Quant Plus** |
 | `get_signal` | **Quant Pro** | Señal cuantitativa de un par de trading | Pase **Quant Pro** |
@@ -104,7 +104,7 @@ La `env` es opcional: **sin ninguna variable el paquete cae solo en la key públ
 
 | Motor | Herramienta | Con la demo key |
 |---|---|---|
-| Radar | `get_insight` | ✅ **solo bitcoin y ethereum**, `pulse` y `alpha` con sello |
+| Radar | `get_insight` | ✅ **solo bitcoin y ethereum**, siempre en vista `alpha` con sello, aunque se pida `pulse` |
 | Quant Plus | `get_insight?engine=quant_plus` | ✅ **solo bitcoin y ethereum**, sello reproducible con `input_vector` |
 | Quant Plus | `batch_signals` | ✅ **solo bitcoin y ethereum**, mismo alcance que `get_insight` |
 | Quant Pro | `get_signal` | ❌ cerrado, para cualquier par |

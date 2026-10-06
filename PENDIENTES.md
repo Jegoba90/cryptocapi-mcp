@@ -13,6 +13,13 @@ usabilidad para agentes cierra con la 0.2.5.
 
 ---
 
+## Cerrado el 2026-10-06, con la 0.2.6
+
+| Qué era | Cómo cerró |
+| :--- | :--- |
+| `get_insight` decía que el `z_score` mide «el MOVIMIENTO de hoy» | Desde la v2.3.0 de los motores es el del último día cerrado (UTC), y desde la v2.4.0 el régimen lee ese mismo día. La descripción ahora lo dice, con el ejemplo corregido («un nivel alto después de un día que cerró con una caída fuerte»), y suma que las stablecoins se leen por la distancia de su último cierre al dólar y no por el `z_score` |
+| `get_insight` decía que la vista `pulse` es libre, y con la demo no lo es | La restricción de la demo es por moneda, no por vista, y el backend le responde siempre alpha. Corregidos la descripción de `get_insight`, el `.describe` de `view`, las dos celdas del README y dos comentarios de `src/tools.ts`, que decían que `pulse` responde sin credencial (sin key la ruta da 401) |
+
 ## Cerrado el 2026-09-28
 
 | Qué era | Cómo cerró |
@@ -95,29 +102,6 @@ nada. Que `main` vaya adelante de npm por eso no es un olvido.
 ---
 
 ## Sigue abierto, dentro del repo
-
-### `get_insight` dice que la vista `pulse` es libre, y con la demo no lo es
-
-Visto el 2026-09-28, contrastando el `llms.txt` con el backend. La descripción
-que recibe el agente dice que `pulse` «es de acceso libre» y que con la key de
-demostración **alpha** funciona solo para bitcoin y ethereum. Se lee como que
-`pulse`, con la demo, sirve cualquier moneda. No es así, y por dos lados:
-
-- **La restricción es por moneda, no por vista.** Con la demo key, `pulse` de
-  solana da 403 `DEMO_COIN_RESTRICTED`, igual que alpha. Medido en producción.
-- **Con la demo, `pulse` no existe.** El backend fuerza la vista alpha para ese
-  plan, pida lo que pida (`insight.controller.ts`, rama `req.plan === 'demo'`):
-  `pulse` de bitcoin devuelve la respuesta alpha entera.
-
-«Libre» es cierto en otro sentido: con una key del plan free, `pulse` no exige
-pase. Sin ninguna key la ruta da 401.
-
-No rompe nada, porque el 403 llega traducido y nombra la restricción. Le cuesta
-un intento al agente que pide `pulse` de otra moneda confiando en la
-descripción. El arreglo es de texto: la descripción de `get_insight` y el
-`.describe` de `view` en [`src/tools.ts`](src/tools.ts), y la celda «`pulse`
-libre» de la tabla del README. Viaja en el tarball, así que sale con la próxima
-versión, y no la justifica por sí solo.
 
 ### Las dos advisories `moderate` del `npm audit`
 
