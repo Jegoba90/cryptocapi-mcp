@@ -127,11 +127,12 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'y su protocol_hash, que es el sello del cálculo, y requiere el pase Radar Alpha ' +
         '(o Quant Plus si se pide engine="quant_plus"). Con la key pública de demostración, ' +
         'alpha funciona solo para bitcoin y ethereum. ' +
-        'Al leer la respuesta: `z_score` mide el MOVIMIENTO de hoy contra los movimientos ' +
-        'pasados, y la posición en Bandas de Bollinger mide el NIVEL de precio contra su ' +
-        'rango. Son ejes distintos: precio en el tercio superior con z_score negativo no es ' +
-        'una contradicción, es un nivel alto que hoy cayó fuerte. No las mezcles en una sola ' +
-        'frase. ' +
+        'Al leer la respuesta: `z_score` mide el MOVIMIENTO del último día cerrado (UTC), no el ' +
+        'del día en curso, contra los movimientos pasados, y la posición en Bandas de Bollinger ' +
+        'mide el NIVEL de precio contra su rango. Son ejes distintos: precio en el tercio ' +
+        'superior con z_score negativo no es una contradicción, es un nivel alto después de un ' +
+        'día que cerró con una caída fuerte. No las mezcles en una sola frase. ' +
+        'Las stablecoins se leen por la distancia de su último cierre al dólar, no por el z_score. ' +
         'Si la moneda todavía no tiene análisis, la respuesta es ' +
         '`{"status":"success","data":null}`: no es un error ni un fallo de la ' +
         'consulta, es que ningún motor calculó nada para ese activo. Decilo así, ' +
