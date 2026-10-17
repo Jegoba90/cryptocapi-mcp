@@ -64,7 +64,7 @@ function textOf(result: unknown): string {
   return first.text ?? '';
 }
 
-test('expone exactamente los cuatro motores, y nada más', async () => {
+test('expone exactamente las cuatro herramientas, y nada más', async () => {
   // Las siete de antes incluían get_market_summary, get_prices y get_macro, que
   // devolvían dato de terceros. Se retiraron el 2026-08-30: si alguien las
   // reintroduce, esto se pone rojo. Ver el comentario en src/tools.ts.

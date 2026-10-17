@@ -9,7 +9,7 @@
 
 <p align="center">
   <b>Análisis de mercado cripto con sello verificable</b>, como herramientas nativas para cualquier agente que hable MCP.<br>
-  Cada respuesta viaja con el SHA-256 de sus inputs, así que el análisis se puede <b>recalcular y comprobar</b> — no hay que creerle al modelo.
+  Cada respuesta viaja con el SHA-256 de sus inputs, así que el análisis se puede <b>recalcular y comprobar</b>: no hay que creerle al modelo.
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@
 <p align="center">
   <a href="#pegá-esto-y-ya-funciona">Empezar</a>
   &nbsp;·&nbsp;
-  <a href="#cuatro-herramientas-cuatro-motores">Herramientas</a>
+  <a href="#cuatro-herramientas-tres-motores-y-market-scan">Herramientas</a>
   &nbsp;·&nbsp;
   <a href="#probarlo-sin-registrarte">Demo</a>
   &nbsp;·&nbsp;
@@ -57,7 +57,7 @@ Con eso ya podés preguntarle a tu agente por Bitcoin o Ethereum y recibir el
 análisis firmado por los dos motores que lo firman. El detalle de hasta dónde
 llega la demo está [más abajo](#probarlo-sin-registrarte).
 
-## Cuatro herramientas, cuatro motores
+## Cuatro herramientas, tres motores y Market Scan
 
 | Herramienta | Motor | Qué devuelve | Qué requiere |
 |---|---|---|---|
@@ -65,9 +65,11 @@ llega la demo está [más abajo](#probarlo-sin-registrarte).
 | `get_insight` con `engine="quant_plus"` | **Quant Plus** | El mismo activo firmado por el motor determinista, con sello `reproducible` | Pase **Quant Plus** |
 | `batch_signals` | **Quant Plus** | Señales de varios activos en una llamada | Pase **Quant Plus** |
 | `get_signal` | **Quant Pro** | Señal cuantitativa de un par de trading | Pase **Quant Pro** |
-| `scan_market` | **Market Scan** | Ranking del mercado según una estrategia | Pase **Market Scan** |
+| `scan_market` | **Market Scan** (capa de ranking) | Ranking del mercado según una estrategia | Pase **Market Scan** |
 
 Son cinco filas para cuatro herramientas porque **`get_insight` es la puerta de dos motores**, y cada uno pide su propio pase. Tener Radar Alpha no abre Quant Plus por ese mismo tool: cambia el parámetro `engine` y cambia el pase que se exige.
+
+**Market Scan no es un cuarto motor.** No calcula señales propias: ordena el mercado sobre las señales de Quant Plus. Se vende aparte porque es otro producto.
 
 <details>
 <summary><b>¿Y <code>get_market_summary</code>, <code>get_prices</code> y <code>get_macro</code>?</b></summary>
@@ -114,7 +116,7 @@ Las tres cerradas **no fallan por la moneda, fallan siempre**: `get_signal` con 
 
 O sea que en la primera sesión responde **una de las cuatro herramientas**, y es la que muestra el producto: el análisis firmado, sobre Bitcoin, con los dos motores que lo firman.
 
-**Para probar los cuatro motores sin límite de moneda** hace falta el trial de 14 días, gratis, en https://cryptocapi.com. Esa key abre todo mientras dura.
+**Para probar los tres motores y Market Scan sin límite de moneda** hace falta el trial de 14 días, gratis, en https://cryptocapi.com. Esa key abre todo mientras dura.
 
 ## Qué lo diferencia
 
@@ -177,9 +179,9 @@ npm run contrato   # verifica contra la API real que el contrato copiado sigue v
 Los tests corren con el runner nativo de Node y **no tienen una sola dependencia de test ni tocan la red**: la API se levanta falsa con `node:http`. Prueban el paquete, no el servicio, que es lo que los hace rápidos y estables.
 
 Ese runner carga TypeScript sin transpilar, así que **para desarrollar hace falta
-Node 22.18 o superior**, aunque el paquete publicado corra en 20 —que es lo que
+Node 22.18 o superior**, aunque el paquete publicado corra en 20: es lo que
 declara `engines`, y lo que el CI verifica arrancando el artefacto construido en
-20, 22 y 24—. Es un requisito de desarrollo, no de uso.
+20, 22 y 24. Es un requisito de desarrollo, no de uso.
 
 Eso deja afuera a propósito una mitad: si el paquete publicado se porta bien contra la API real y dentro de un agente. Para eso está [PRUEBAS.md](PRUEBAS.md), catorce comprobaciones manuales que se corren después de cada release.
 
@@ -206,6 +208,16 @@ El workflow comprueba primero que el tag coincida con la versión del `package.j
 Con npm arriba, un segundo job le manda el `server.json` al Registry, también por OIDC. Va aparte para que, si el Registry falla, «Re-run failed jobs» reintente solo eso sin volver a pasar por `npm publish`.
 
 Para el servidor, `npm version` es la única fuente de la versión: lee el `package.json` publicado para declarar su `serverInfo.version`, y un test del handshake falla si los dos números se separan. El único literal a mano es el de `server.json`, y si queda atrás el tag no pasa la primera comprobación.
+
+## Versionado
+
+Desde la `1.0.0` el paquete sigue [semver](https://semver.org/lang/es/). El contrato son las cuatro herramientas, sus parámetros y la forma de sus respuestas:
+
+- **Parche (`1.0.x`):** arreglos y textos. Las herramientas y sus parámetros quedan iguales.
+- **Menor (`1.x.0`):** lo nuevo que no rompe nada, como una herramienta o un parámetro opcional más.
+- **Mayor (`2.0.0`):** sacar o renombrar una herramienta, o cambiar un parámetro que ya existe. Si alguna vez hace falta, se avisa antes.
+
+Las respuestas viajan tal cual las sirve la API, así que un campo nuevo puede aparecer en ellas sin una versión nueva del paquete.
 
 ## Licencia
 

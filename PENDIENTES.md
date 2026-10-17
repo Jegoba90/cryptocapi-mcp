@@ -13,6 +13,13 @@ usabilidad para agentes cierra con la 0.2.5.
 
 ---
 
+## Cerrado el 2026-10-17, con la 1.0.0
+
+| Qué era | Cómo cerró |
+| :--- | :--- |
+| El README, la descripción de npm y `server.json` decían «cuatro motores» | Market Scan es una capa de ranking sobre las señales de Quant Plus, no un cuarto motor (decidido el 2026-10-03). Ahora dicen «tres motores y Market Scan». Lo encontró el usuario en mcpmarket.com, un directorio que copió el README |
+| El paquete seguía en `0.x` sin que nadie lo hubiera decidido | Las cuatro herramientas no cambian desde la 0.2.0 (2026-08-30) y lo que viene se puede sumar sin romperlas. Pasa a `1.0.0` por decisión del usuario, y el README dice qué promete cada tipo de versión |
+
 ## Cerrado el 2026-10-06, con la 0.2.6
 
 | Qué era | Cómo cerró |
@@ -94,7 +101,7 @@ Cualquiera de estas tres, sin esperar a una revisión:
 1. **El chequeo diario de contrato se pone rojo.** Si el backend mueve el
    contrato, el arreglo cae en `src/` y ahí sí hay que publicar. El workflow abre
    un issue solo, así que no hace falta vigilarlo.
-2. **Alguien reporta un bug real** en cualquiera de los cuatro motores.
+2. **Alguien reporta un bug real** en cualquiera de los motores o en Market Scan.
 3. **Cualquier otro cambio de comportamiento** que amerite llegar al usuario.
 
 Lo que no viaja en el tarball —workflows, tests, esta documentación— no dispara

@@ -79,7 +79,7 @@ jobs:
             if (nombres !== esperado) {
               throw new Error('la superficie cambió. Esperado: ' + esperado + ' — Recibido: ' + nombres);
             }
-            console.log('handshake OK, los cuatro motores');
+            console.log('handshake OK, las cuatro herramientas');
           "
 
   dependencias:
