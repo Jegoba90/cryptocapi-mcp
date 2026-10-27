@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://cryptocapi.com">
+  <a href="https://www.cryptocapi.com">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/cryptocapi-logo-dark.svg">
       <img src=".github/assets/cryptocapi-logo-light.svg" alt="CryptoCapi · MCP server" width="400">
@@ -32,7 +32,7 @@
   &nbsp;·&nbsp;
   <a href="#configuración">Configuración</a>
   &nbsp;·&nbsp;
-  <a href="https://cryptocapi.com">cryptocapi.com</a>
+  <a href="https://www.cryptocapi.com">cryptocapi.com</a>
 </p>
 
 <br>
@@ -56,6 +56,10 @@ cliente MCP:
 Con eso ya podés preguntarle a tu agente por Bitcoin o Ethereum y recibir el
 análisis firmado por los dos motores que lo firman. El detalle de hasta dónde
 llega la demo está [más abajo](#probarlo-sin-registrarte).
+
+¿Lo usás con Claude para analizar trading? La guía
+[Bot de trading con Claude, sin precios inventados](https://www.cryptocapi.com/guias/bot-de-trading-con-claude)
+trae pedidos de ejemplo y las reglas para que el modelo no invente números.
 
 ## Cuatro herramientas, tres motores y Market Scan
 
@@ -116,7 +120,7 @@ Las tres cerradas **no fallan por la moneda, fallan siempre**: `get_signal` con 
 
 O sea que en la primera sesión responde **una de las cuatro herramientas**, y es la que muestra el producto: el análisis firmado, sobre Bitcoin, con los dos motores que lo firman.
 
-**Para probar los tres motores y Market Scan sin límite de moneda** hace falta el trial de 14 días, gratis, en https://cryptocapi.com. Esa key abre todo mientras dura.
+**Para probar los tres motores y Market Scan sin límite de moneda** hace falta el trial de 14 días, gratis, en https://www.cryptocapi.com. Esa key abre todo mientras dura.
 
 ## Qué lo diferencia
 
@@ -166,7 +170,7 @@ conviene que sea por encima del más alto.
 Cuando una herramienta se corta, el error dice el presupuesto que efectivamente
 rigió, así que ese número es el que hay que superar.
 
-Conseguir una key con prueba de 14 días: [cryptocapi.com](https://cryptocapi.com)
+Conseguir una key con prueba de 14 días: [cryptocapi.com](https://www.cryptocapi.com)
 
 ## Desarrollo
 
@@ -226,7 +230,7 @@ Las respuestas viajan tal cual las sirve la API, así que un campo nuevo puede a
 <br>
 
 <p align="center">
-  <a href="https://cryptocapi.com"><b>cryptocapi.com</b></a>
+  <a href="https://www.cryptocapi.com"><b>cryptocapi.com</b></a>
   &nbsp;·&nbsp;
   <a href="https://www.npmjs.com/package/@cryptocapi/mcp">npm</a>
   &nbsp;·&nbsp;

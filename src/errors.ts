@@ -12,7 +12,7 @@
 import { ApiRequestError, type ApiResponse } from './http.js';
 import { ApiErrorBodySchema, KNOWN_ERROR_CODES, type ApiErrorBody } from './contract/errors.js';
 
-const TRIAL_URL = 'https://cryptocapi.com';
+const TRIAL_URL = 'https://www.cryptocapi.com';
 
 /** Los nombres comerciales, iguales a los que ve el cliente al comprar. */
 const PRODUCT_LABELS: Record<string, string> = {

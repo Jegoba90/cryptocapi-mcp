@@ -6,13 +6,13 @@
     "url": "https://github.com/Jegoba90/cryptocapi-mcp",
     "source": "github"
   },
-  "version": "1.0.0",
-  "websiteUrl": "https://cryptocapi.com/docs/agentes",
+  "version": "1.0.1",
+  "websiteUrl": "https://www.cryptocapi.com/docs/agentes",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@cryptocapi/mcp",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "transport": {
         "type": "stdio"
       },

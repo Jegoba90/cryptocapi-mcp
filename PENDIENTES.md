@@ -13,6 +13,15 @@ usabilidad para agentes cierra con la 0.2.5.
 
 ---
 
+## Cerrado el 2026-10-27, con la 1.0.1
+
+| Qué era | Cómo cerró |
+| :--- | :--- |
+| El README, la `homepage` de npm, el `websiteUrl` del Registry y el enlace del mensaje de error apuntaban a `https://cryptocapi.com`, que redirige a `www` | Apuntan directo a `https://www.cryptocapi.com`, la dirección canónica. Es parte del paso 4 del plan de SEO del sitio: un enlace directo le suma a Google sin pasar por la redirección |
+| El README no enlazaba a ninguna guía | Enlaza a «Bot de trading con Claude, sin precios inventados», la guía del sitio que responde a las búsquedas de Claude + trading + MCP |
+
+Es un parche por el criterio del README: textos y enlaces, mismas herramientas y mismos parámetros.
+
 ## Cerrado el 2026-10-17, con la 1.0.0
 
 | Qué era | Cómo cerró |
