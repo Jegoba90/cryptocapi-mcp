@@ -15,6 +15,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@cryptocapi/mcp"><img alt="npm" src="https://img.shields.io/npm/v/@cryptocapi/mcp?style=flat-square&logo=npm&logoColor=white&label=npm&labelColor=333333&color=007bff"></a>
   <a href="https://registry.modelcontextprotocol.io"><img alt="MCP Registry" src="https://img.shields.io/badge/MCP%20Registry-io.github.Jegoba90%2Fcryptocapi-007bff?style=flat-square&labelColor=333333"></a>
+  <a href="https://mcpservers.org/servers/jegoba90/cryptocapi-mcp"><img alt="Listed on mcpservers.org" src="https://img.shields.io/badge/mcpservers.org-listed-007bff?style=flat-square&labelColor=333333"></a>
   <a href="https://github.com/Jegoba90/cryptocapi-mcp/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Jegoba90/cryptocapi-mcp/ci.yml?branch=main&style=flat-square&logo=githubactions&logoColor=white&label=CI&labelColor=333333"></a>
   <a href="https://github.com/Jegoba90/cryptocapi-mcp/actions/workflows/contrato.yml"><img alt="Contrato con la API real" src="https://img.shields.io/github/actions/workflow/status/Jegoba90/cryptocapi-mcp/contrato.yml?branch=main&style=flat-square&label=contrato%20con%20la%20API&labelColor=333333"></a>
   <a href="package.json"><img alt="Node" src="https://img.shields.io/node/v/@cryptocapi/mcp?style=flat-square&logo=nodedotjs&logoColor=white&label=node&labelColor=333333&color=007bff"></a>
