@@ -9,7 +9,7 @@
 
 <p align="center">
   <b>Análisis de mercado cripto con sello verificable</b>, como herramientas nativas para cualquier agente que hable MCP.<br>
-  Cada respuesta viaja con el SHA-256 de sus inputs, así que el análisis se puede <b>recalcular y comprobar</b>: no hay que creerle al modelo.
+  Cada análisis de los motores viaja con su sello SHA-256, para que lo <b>compruebes por tu cuenta</b>: no hay que creerle al modelo.
 </p>
 
 <p align="center">
@@ -40,8 +40,7 @@
 
 ## Pegá esto y ya funciona
 
-Sin cuenta, sin registrarte, sin clave. Va en el archivo de configuración de tu
-cliente MCP:
+Sin cuenta, sin registrarte, sin clave. Va en la configuración MCP de tu cliente:
 
 ```json
 {
@@ -53,6 +52,36 @@ cliente MCP:
   }
 }
 ```
+
+Ese bloque es el formato de Cursor (`.cursor/mcp.json` en el proyecto, o
+`~/.cursor/mcp.json` para todos), Windsurf y Claude Desktop. Según el cliente,
+cambia la forma:
+
+**VS Code (GitHub Copilot).** El archivo es `.vscode/mcp.json`, la clave es
+`servers` y no `mcpServers`, y cada servidor lleva `"type": "stdio"`.
+
+```json
+{
+  "servers": {
+    "cryptocapi": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@cryptocapi/mcp"]
+    }
+  }
+}
+```
+
+**Claude Code y Codex.** Un comando, sin editar ningún archivo. En Claude Code,
+sin `--scope user` queda solo en el proyecto donde lo corriste.
+
+```bash
+claude mcp add --transport stdio cryptocapi -- npx -y @cryptocapi/mcp
+codex mcp add cryptocapi -- npx -y @cryptocapi/mcp
+```
+
+**ChatGPT, no.** Sus conectores solo llegan a servidores MCP remotos, y este
+corre local, por stdio.
 
 Con eso ya podés preguntarle a tu agente por Bitcoin o Ethereum y recibir el
 análisis firmado por los dos motores que lo firman. El detalle de hasta dónde
@@ -155,6 +184,11 @@ En la página del paquete en npm aparece además el enlace al commit exacto. Es 
 | `CRYPTOCAPI_API_KEY` | Tu API key | `demo_btc_eth_public` |
 | `CRYPTOCAPI_API_BASE` | Base de la API, para desarrollo | `https://api.cryptocapi.com/v1` |
 | `CRYPTOCAPI_TIMEOUT_MS` | Presupuesto por request, en ms. Ver abajo | según la herramienta |
+
+Las variables van en el `env` del bloque de configuración, o con `--env` en el
+comando: en Claude Code, antes de `--transport` (si el nombre del servidor
+queda justo después de `--env`, lo toma como otra variable); en Codex, después
+del nombre.
 
 **El presupuesto de tiempo no es uno solo.** Cada herramienta pide el suyo, porque
 no cuestan lo mismo: 20 s para un motor sobre un activo (`get_insight`,

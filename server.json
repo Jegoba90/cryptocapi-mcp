@@ -1,18 +1,18 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.Jegoba90/cryptocapi",
-  "description": "Análisis de mercado cripto con sello verificable: cada respuesta trae el SHA-256 de sus inputs.",
+  "description": "Análisis de mercado cripto con sello verificable: cada motor firma su análisis con SHA-256.",
   "repository": {
     "url": "https://github.com/Jegoba90/cryptocapi-mcp",
     "source": "github"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "websiteUrl": "https://www.cryptocapi.com/docs/agentes",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@cryptocapi/mcp",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "transport": {
         "type": "stdio"
       },

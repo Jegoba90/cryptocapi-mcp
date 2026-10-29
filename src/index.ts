@@ -61,7 +61,7 @@ async function main(): Promise<void> {
   // Todo diagnóstico por stderr; stdout es sólo del protocolo (§11.1).
   log.info(
     `iniciando contra ${config.baseUrl}` +
-      (config.usingDemoKey ? ' con la demo key pública (BTC y ETH en Radar Alpha)' : '')
+      (config.usingDemoKey ? ' con la demo key pública (BTC y ETH en Radar y Quant Plus)' : '')
   );
 
   const transport = new StdioServerTransport();

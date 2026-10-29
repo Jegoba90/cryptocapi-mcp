@@ -151,8 +151,8 @@ function describeHttpError(response: ApiResponse, body: ApiErrorBody | undefined
       return (
         `${apiMessage}\n\n` +
         'Falta una API key válida. Se configura en la variable de entorno ' +
-        `CRYPTOCAPI_API_KEY del mcp.json. Prueba gratuita de 14 días en ${TRIAL_URL}. ` +
-        'Sin registro, la key pública demo_btc_eth_public sirve Radar Alpha para bitcoin y ethereum.'
+        `CRYPTOCAPI_API_KEY de la configuración MCP del agente. Prueba gratuita de 14 días en ${TRIAL_URL}. ` +
+        'Sin registro, la key pública demo_btc_eth_public sirve Radar y Quant Plus para bitcoin y ethereum.'
       );
 
     case 403:
@@ -229,8 +229,8 @@ function describeHttpError(response: ApiResponse, body: ApiErrorBody | undefined
           `${apiMessage}\n\n` +
           'El problema es la API key en sí, no el plan: puede estar mal copiada, ' +
           'revocada o dada de baja. Se configura en la variable CRYPTOCAPI_API_KEY ' +
-          `del mcp.json del agente. Para sacar una nueva: ${TRIAL_URL}. Sin registro, ` +
-          'la key pública demo_btc_eth_public sirve Radar Alpha para bitcoin y ethereum.'
+          `de la configuración MCP del agente. Para sacar una nueva: ${TRIAL_URL}. Sin registro, ` +
+          'la key pública demo_btc_eth_public sirve Radar y Quant Plus para bitcoin y ethereum.'
         );
       }
 
@@ -275,7 +275,7 @@ export function explainRequestError(error: ApiRequestError): string {
     // presupuesto del tool, así que la cuenta le daba mal a quien seguía el consejo.
     return (
       `${error.message}\n\n` +
-      'Se puede ampliar el presupuesto con la variable CRYPTOCAPI_TIMEOUT_MS del mcp.json. ' +
+      'Se puede ampliar el presupuesto con la variable CRYPTOCAPI_TIMEOUT_MS de la configuración MCP. ' +
       'Ojo: esa variable REEMPLAZA el presupuesto de todas las herramientas, no se suma, ' +
       'así que hay que fijarla por encima del número de arriba o lo vas a recortar.'
     );
