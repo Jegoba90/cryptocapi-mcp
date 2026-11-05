@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <b>Análisis de mercado cripto con sello verificable</b>, como herramientas nativas para cualquier agente que hable MCP.<br>
-  Cada análisis de los motores viaja con su sello SHA-256, para que lo <b>compruebes por tu cuenta</b>: no hay que creerle al modelo.
+  <b>Crypto market analysis with a verifiable seal</b>, as native tools for any agent that speaks MCP.<br>
+  Every engine analysis ships with its SHA-256 seal, so you can <b>check it yourself</b>: you don't have to trust the model.
 </p>
 
 <p align="center">
@@ -17,30 +17,34 @@
   <a href="https://registry.modelcontextprotocol.io"><img alt="MCP Registry" src="https://img.shields.io/badge/MCP%20Registry-io.github.Jegoba90%2Fcryptocapi-007bff?style=flat-square&labelColor=333333"></a>
   <a href="https://mcpservers.org/servers/jegoba90/cryptocapi-mcp"><img alt="Listed on mcpservers.org" src="https://img.shields.io/badge/mcpservers.org-listed-007bff?style=flat-square&labelColor=333333"></a>
   <a href="https://github.com/Jegoba90/cryptocapi-mcp/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Jegoba90/cryptocapi-mcp/ci.yml?branch=main&style=flat-square&logo=githubactions&logoColor=white&label=CI&labelColor=333333"></a>
-  <a href="https://github.com/Jegoba90/cryptocapi-mcp/actions/workflows/contrato.yml"><img alt="Contrato con la API real" src="https://img.shields.io/github/actions/workflow/status/Jegoba90/cryptocapi-mcp/contrato.yml?branch=main&style=flat-square&label=contrato%20con%20la%20API&labelColor=333333"></a>
+  <a href="https://github.com/Jegoba90/cryptocapi-mcp/actions/workflows/contrato.yml"><img alt="Contract with the live API" src="https://img.shields.io/github/actions/workflow/status/Jegoba90/cryptocapi-mcp/contrato.yml?branch=main&style=flat-square&label=API%20contract&labelColor=333333"></a>
   <a href="package.json"><img alt="Node" src="https://img.shields.io/node/v/@cryptocapi/mcp?style=flat-square&logo=nodedotjs&logoColor=white&label=node&labelColor=333333&color=007bff"></a>
-  <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-007bff?style=flat-square&labelColor=333333"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-007bff?style=flat-square&labelColor=333333"></a>
 </p>
 
 <p align="center">
-  <a href="#pegá-esto-y-ya-funciona">Empezar</a>
+  <a href="https://glama.ai/mcp/servers/Jegoba90/cryptocapi-mcp"><img alt="CryptoCapi MCP server on Glama" src="https://glama.ai/mcp/servers/Jegoba90/cryptocapi-mcp/badges/score.svg"></a>
+</p>
+
+<p align="center">
+  <a href="#paste-this-and-it-works">Get started</a>
   &nbsp;·&nbsp;
-  <a href="#cuatro-herramientas-tres-motores-y-market-scan">Herramientas</a>
+  <a href="#four-tools-three-engines-and-market-scan">Tools</a>
   &nbsp;·&nbsp;
-  <a href="#probarlo-sin-registrarte">Demo</a>
+  <a href="#try-it-without-signing-up">Demo</a>
   &nbsp;·&nbsp;
-  <a href="#qué-lo-diferencia">Verificar el sello</a>
+  <a href="#what-sets-it-apart">Verify the seal</a>
   &nbsp;·&nbsp;
-  <a href="#configuración">Configuración</a>
+  <a href="#configuration">Configuration</a>
   &nbsp;·&nbsp;
   <a href="https://www.cryptocapi.com">cryptocapi.com</a>
 </p>
 
 <br>
 
-## Pegá esto y ya funciona
+## Paste this and it works
 
-Sin cuenta, sin registrarte, sin clave. Va en la configuración MCP de tu cliente:
+No account, no sign-up, no key. It goes in your client's MCP configuration:
 
 ```json
 {
@@ -53,12 +57,12 @@ Sin cuenta, sin registrarte, sin clave. Va en la configuración MCP de tu client
 }
 ```
 
-Ese bloque es el formato de Cursor (`.cursor/mcp.json` en el proyecto, o
-`~/.cursor/mcp.json` para todos), Windsurf y Claude Desktop. Según el cliente,
-cambia la forma:
+That block is the format for Cursor (`.cursor/mcp.json` in the project, or
+`~/.cursor/mcp.json` for all of them), Windsurf and Claude Desktop. Other
+clients use a different shape:
 
-**VS Code (GitHub Copilot).** El archivo es `.vscode/mcp.json`, la clave es
-`servers` y no `mcpServers`, y cada servidor lleva `"type": "stdio"`.
+**VS Code (GitHub Copilot).** The file is `.vscode/mcp.json`, the key is
+`servers` rather than `mcpServers`, and each server carries `"type": "stdio"`.
 
 ```json
 {
@@ -72,55 +76,56 @@ cambia la forma:
 }
 ```
 
-**Claude Code y Codex.** Un comando, sin editar ningún archivo. En Claude Code,
-sin `--scope user` queda solo en el proyecto donde lo corriste.
+**Claude Code and Codex.** One command, no file to edit. In Claude Code,
+without `--scope user` it only applies to the project where you ran it.
 
 ```bash
 claude mcp add --transport stdio cryptocapi -- npx -y @cryptocapi/mcp
 codex mcp add cryptocapi -- npx -y @cryptocapi/mcp
 ```
 
-**ChatGPT, no.** Sus conectores solo llegan a servidores MCP remotos, y este
-corre local, por stdio.
+**ChatGPT, no.** Its connectors only reach remote MCP servers, and this one
+runs locally, over stdio.
 
-Con eso ya podés preguntarle a tu agente por Bitcoin o Ethereum y recibir el
-análisis firmado por los dos motores que lo firman. El detalle de hasta dónde
-llega la demo está [más abajo](#probarlo-sin-registrarte).
+With that you can already ask your agent about Bitcoin or Ethereum and get the
+analysis signed by the two engines that sign it. How far the demo goes is
+covered [below](#try-it-without-signing-up).
 
-¿Lo usás con Claude para analizar trading? La guía
-[Bot de trading con Claude, sin precios inventados](https://www.cryptocapi.com/guias/bot-de-trading-con-claude)
-trae pedidos de ejemplo y las reglas para que el modelo no invente números.
+Using it with Claude for trading analysis? The guide
+[Trading bot with Claude, without made-up prices](https://www.cryptocapi.com/guias/bot-de-trading-con-claude)
+(in Spanish) has example prompts and the rules that keep the model from
+inventing numbers.
 
-## Cuatro herramientas, tres motores y Market Scan
+## Four tools, three engines and Market Scan
 
-| Herramienta | Motor | Qué devuelve | Qué requiere |
+| Tool | Engine | What it returns | What it requires |
 |---|---|---|---|
-| `get_insight` | **Radar** | Análisis de un activo. La vista `alpha` trae el sello | `pulse` sin pase con una key free · `alpha` requiere pase **Radar Alpha** |
-| `get_insight` con `engine="quant_plus"` | **Quant Plus** | El mismo activo firmado por el motor determinista, con sello `reproducible` | Pase **Quant Plus** |
-| `batch_signals` | **Quant Plus** | Señales de varios activos en una llamada | Pase **Quant Plus** |
-| `get_signal` | **Quant Pro** | Señal cuantitativa de un par de trading | Pase **Quant Pro** |
-| `scan_market` | **Market Scan** (capa de ranking) | Ranking del mercado según una estrategia | Pase **Market Scan** |
+| `get_insight` | **Radar** | Analysis of an asset. The `alpha` view carries the seal | `pulse` without a pass on a free key · `alpha` requires the **Radar Alpha** pass |
+| `get_insight` with `engine="quant_plus"` | **Quant Plus** | The same asset signed by the deterministic engine, with a `reproducible` seal | **Quant Plus** pass |
+| `batch_signals` | **Quant Plus** | Signals for several assets in one call | **Quant Plus** pass |
+| `get_signal` | **Quant Pro** | Quantitative signal for a trading pair | **Quant Pro** pass |
+| `scan_market` | **Market Scan** (ranking layer) | Market ranking by strategy | **Market Scan** pass |
 
-Son cinco filas para cuatro herramientas porque **`get_insight` es la puerta de dos motores**, y cada uno pide su propio pase. Tener Radar Alpha no abre Quant Plus por ese mismo tool: cambia el parámetro `engine` y cambia el pase que se exige.
+There are five rows for four tools because **`get_insight` is the door to two engines**, and each one asks for its own pass. Having Radar Alpha does not open Quant Plus through that same tool: change the `engine` parameter and the required pass changes too.
 
-**Market Scan no es un cuarto motor.** No calcula señales propias: ordena el mercado sobre las señales de Quant Plus. Se vende aparte porque es otro producto.
+**Market Scan is not a fourth engine.** It computes no signals of its own: it ranks the market on top of Quant Plus signals. It is sold separately because it is a different product.
 
 <details>
-<summary><b>¿Y <code>get_market_summary</code>, <code>get_prices</code> y <code>get_macro</code>?</b></summary>
+<summary><b>What about <code>get_market_summary</code>, <code>get_prices</code> and <code>get_macro</code>?</b></summary>
 
 <br>
 
-**Hasta el 2026-08-30 había tres herramientas más** (`get_market_summary`, `get_prices`, `get_macro`) que devolvían dato de terceros: capitalización y miedo y codicia, precios de CoinGecko y series macro de FRED. Se retiraron porque CryptoCapi no es un agregador: sus motores firman inteligencia derivada y el dato ajeno es insumo interno. Un agente que preguntaba «¿cómo está el mercado?» agarraba el resumen y se iba con dato de terceros sin tocar un motor. Esos endpoints siguen existiendo en la API REST; lo que se retiró es que el agente los vea como herramientas.
+**Until 2026-08-30 there were three more tools** (`get_market_summary`, `get_prices`, `get_macro`) that returned third-party data: market cap and fear and greed, CoinGecko prices and FRED macro series. They were retired because CryptoCapi is not an aggregator: its engines sign derived intelligence, and third-party data is an internal input. An agent asking "how is the market doing?" would grab the summary and leave with third-party data without touching an engine. Those endpoints still exist in the REST API; what was retired is the agent seeing them as tools.
 
 </details>
 
-**Cada motor se compra por separado, así que tener uno no habilita los otros.** Las descripciones nombran el motor que hace falta, no un «PRO» genérico, para que el agente no gaste intentos en herramientas que su clave no abre. Cuando igual las intenta, el error le dice qué pase falta y cuál sí tiene, en vez de un 403 pelado.
+**Each engine is bought separately, so having one does not unlock the others.** The descriptions name the engine that is needed, not a generic "PRO", so the agent doesn't waste attempts on tools its key can't open. When it tries anyway, the error tells it which pass is missing and which one it has, instead of a bare 403.
 
-Ojo con un detalle de formato que hace fallar a los agentes: `get_signal` toma un **par de trading** (`BTCUSDT`) y `batch_signals` toma **identificadores de moneda** (`bitcoin`). Es el mismo motor con dos formatos, y cada campo lo aclara en su esquema.
+Watch out for a format detail that trips agents up: `get_signal` takes a **trading pair** (`BTCUSDT`) and `batch_signals` takes **coin identifiers** (`bitcoin`). Same engine, two formats, and each field spells it out in its schema.
 
-## Probarlo sin registrarte
+## Try it without signing up
 
-La configuración por defecto usa la key pública de demostración. No hace falta cuenta.
+The default configuration uses the public demo key. No account needed.
 
 ```json
 {
@@ -134,131 +139,133 @@ La configuración por defecto usa la key pública de demostración. No hace falt
 }
 ```
 
-La `env` es opcional: **sin ninguna variable el paquete cae solo en la key pública de demostración**, así que alcanza con `command` y `args`.
+The `env` is optional: **with no variable at all, the package falls back to the public demo key on its own**, so `command` and `args` are enough.
 
-**Qué alcanza con la demo key, medido el 2026-08-30 contra la versión publicada:**
+**What the demo key reaches, measured on 2026-08-30 against the published version:**
 
-| Motor | Herramienta | Con la demo key |
+| Engine | Tool | With the demo key |
 |---|---|---|
-| Radar | `get_insight` | ✅ **solo bitcoin y ethereum**, siempre en vista `alpha` con sello, aunque se pida `pulse` |
-| Quant Plus | `get_insight?engine=quant_plus` | ✅ **solo bitcoin y ethereum**, sello reproducible con `input_vector` |
-| Quant Plus | `batch_signals` | ✅ **solo bitcoin y ethereum**, mismo alcance que `get_insight` |
-| Quant Pro | `get_signal` | ❌ cerrado, para cualquier par |
-| Market Scan | `scan_market` | ❌ cerrado, para cualquier estrategia |
+| Radar | `get_insight` | ✅ **bitcoin and ethereum only**, always in the `alpha` view with a seal, even if you ask for `pulse` |
+| Quant Plus | `get_insight?engine=quant_plus` | ✅ **bitcoin and ethereum only**, reproducible seal with `input_vector` |
+| Quant Plus | `batch_signals` | ✅ **bitcoin and ethereum only**, same reach as `get_insight` |
+| Quant Pro | `get_signal` | ❌ closed, for any pair |
+| Market Scan | `scan_market` | ❌ closed, for any strategy |
 
-Las tres cerradas **no fallan por la moneda, fallan siempre**: `get_signal` con `BTCUSDT`, que es el par de Bitcoin, también devuelve 403. La restricción a bitcoin y ethereum aplica a `get_insight` y nada más.
+The closed ones **don't fail because of the coin, they always fail**: `get_signal` with `BTCUSDT`, Bitcoin's pair, also returns 403. The bitcoin-and-ethereum restriction applies to `get_insight` and `batch_signals`, nothing else.
 
-O sea que en la primera sesión responde **una de las cuatro herramientas**, y es la que muestra el producto: el análisis firmado, sobre Bitcoin, con los dos motores que lo firman.
+So in a first session, `get_insight` and `batch_signals` answer, and they show the product: the signed analysis, on Bitcoin, from the two engines that sign it.
 
-**Para probar los tres motores y Market Scan sin límite de moneda** hace falta el trial de 14 días, gratis, en https://www.cryptocapi.com. Esa key abre todo mientras dura.
+**To try all three engines and Market Scan with no coin limit** you need the free 14-day trial at https://www.cryptocapi.com. That key opens everything while it lasts.
 
-## Qué lo diferencia
+## What sets it apart
 
-La respuesta de los motores viaja con un `audit_trail` que incluye un `protocol_hash`: un sello del cálculo determinista que produjo el análisis. Este paquete **reenvía esos valores tal como llegaron de la API, sin volver a serializarlos**, porque reformatear un solo número bastaría para que el hash dejara de verificar.
+The engines' response carries an `audit_trail` that includes a `protocol_hash`: a seal of the deterministic computation that produced the analysis. This package **forwards those values exactly as they came from the API, without re-serializing them**, because reformatting a single number would be enough for the hash to stop verifying.
 
-No hace falta creernos: pedile a tu agente el análisis con `get_insight(coin_id="bitcoin", view="alpha")` y compará el `protocol_hash` de esa salida con el de la misma consulta hecha directo contra la API.
+You don't have to take our word for it: ask your agent for the analysis with `get_insight(coin_id="bitcoin", view="alpha")` and compare the `protocol_hash` in that output with the one from the same query made directly against the API.
 
 ```bash
 curl -H "x-api-key: demo_btc_eth_public" \
   "https://api.cryptocapi.com/v1/market/insights/bitcoin?view=alpha"
 ```
 
-Tienen que ser idénticos. Si algún día no lo son, es un fallo de este paquete y merece un issue.
+They must be identical. If they ever aren't, it's a bug in this package and deserves an issue.
 
-**El límite, dicho también:** el sello prueba que el cálculo es reproducible y que no lo escribió un modelo de lenguaje. No prueba que el análisis acierte, y hoy es un checksum sin firma criptográfica, así que acredita integridad, no origen.
+**The limit, stated as well:** the seal proves the computation is reproducible and that no language model wrote it. It does not prove the analysis is right, and today it is a checksum without a cryptographic signature, so it attests integrity, not origin.
 
-### Y el paquete también se verifica
+### And the package can be verified too
 
-El sello cubre los datos. Que el tarball que te bajás sea el que salió de este código lo cubre otra cosa: se publica **desde CI con procedencia de npm**, así que cada versión queda ligada al commit y al workflow que la construyeron.
+The seal covers the data. That the tarball you download is the one built from this code is covered by something else: it is published **from CI with npm provenance**, so each version is tied to the commit and the workflow that built it.
 
 ```bash
 npm audit signatures
 ```
 
-En la página del paquete en npm aparece además el enlace al commit exacto. Es el mismo principio que el `protocol_hash`, aplicado a la cadena de suministro en vez de a los datos: no hace falta creernos, se comprueba.
+The package's npm page also links to the exact commit. It is the same principle as the `protocol_hash`, applied to the supply chain instead of the data: you don't have to trust us, you can check.
 
-## Configuración
+## Configuration
 
-| Variable | Para qué | Por defecto |
+| Variable | What for | Default |
 |---|---|---|
-| `CRYPTOCAPI_API_KEY` | Tu API key | `demo_btc_eth_public` |
-| `CRYPTOCAPI_API_BASE` | Base de la API, para desarrollo | `https://api.cryptocapi.com/v1` |
-| `CRYPTOCAPI_TIMEOUT_MS` | Presupuesto por request, en ms. Ver abajo | según la herramienta |
+| `CRYPTOCAPI_API_KEY` | Your API key | `demo_btc_eth_public` |
+| `CRYPTOCAPI_API_BASE` | API base URL, for development | `https://api.cryptocapi.com/v1` |
+| `CRYPTOCAPI_TIMEOUT_MS` | Time budget per request, in ms. See below | depends on the tool |
 
-Las variables van en el `env` del bloque de configuración, o con `--env` en el
-comando: en Claude Code, antes de `--transport` (si el nombre del servidor
-queda justo después de `--env`, lo toma como otra variable); en Codex, después
-del nombre.
+The variables go in the `env` of the configuration block, or with `--env` on
+the command: in Claude Code, before `--transport` (if the server name lands
+right after `--env`, it is taken as another variable); in Codex, after the
+name.
 
-**El presupuesto de tiempo no es uno solo.** Cada herramienta pide el suyo, porque
-no cuestan lo mismo: 20 s para un motor sobre un activo (`get_insight`,
-`get_signal`) y 45 s para los que recorren varios (`batch_signals`, `scan_market`).
-Cortar un recorrido del mercado con el presupuesto de una lectura da un timeout
-falso, y el agente concluye que la API está caída cuando en realidad estaba
-trabajando.
+**There isn't a single time budget.** Each tool asks for its own, because they
+don't cost the same: 20 s for one engine on one asset (`get_insight`,
+`get_signal`) and 45 s for the ones that go through several (`batch_signals`,
+`scan_market`). Cutting a market sweep with the budget of a single read gives a
+false timeout, and the agent concludes the API is down when it was actually
+working.
 
-`CRYPTOCAPI_TIMEOUT_MS` **reemplaza** esos presupuestos, no se suma a ellos: el
-número que pongas rige para las cuatro herramientas. Ponerlo en `30000` para
-darle más aire a `scan_market` en realidad se lo recorta, de 45 s a 30. Si se toca,
-conviene que sea por encima del más alto.
+`CRYPTOCAPI_TIMEOUT_MS` **replaces** those budgets, it does not add to them: the
+number you set applies to all four tools. Setting it to `30000` to give
+`scan_market` more room actually cuts it, from 45 s to 30. If you change it,
+make it higher than the highest one.
 
-Cuando una herramienta se corta, el error dice el presupuesto que efectivamente
-rigió, así que ese número es el que hay que superar.
+When a tool times out, the error states the budget that actually applied, so
+that is the number to beat.
 
-Conseguir una key con prueba de 14 días: [cryptocapi.com](https://www.cryptocapi.com)
+Get a key with a 14-day trial: [cryptocapi.com](https://www.cryptocapi.com)
 
-## Desarrollo
+## Development
 
 ```bash
 npm install
-npm run check      # tipos + tests + auditoría de dependencias
-npm run contrato   # verifica contra la API real que el contrato copiado sigue vigente
+npm run check      # types + tests + dependency audit
+npm run contrato   # checks against the live API that the copied contract still holds
 ```
 
-Los tests corren con el runner nativo de Node y **no tienen una sola dependencia de test ni tocan la red**: la API se levanta falsa con `node:http`. Prueban el paquete, no el servicio, que es lo que los hace rápidos y estables.
+The tests run on Node's native runner and **have no test dependency and never touch the network**: the API is faked with `node:http`. They test the package, not the service, which is what makes them fast and stable.
 
-Ese runner carga TypeScript sin transpilar, así que **para desarrollar hace falta
-Node 22.18 o superior**, aunque el paquete publicado corra en 20: es lo que
-declara `engines`, y lo que el CI verifica arrancando el artefacto construido en
-20, 22 y 24. Es un requisito de desarrollo, no de uso.
+That runner loads TypeScript without transpiling, so **developing requires Node
+22.18 or later**, even though the published package runs on 20: that is what
+`engines` declares, and what CI checks by starting the built artifact on 20, 22
+and 24. It is a development requirement, not a usage one.
 
-Eso deja afuera a propósito una mitad: si el paquete publicado se porta bien contra la API real y dentro de un agente. Para eso está [PRUEBAS.md](PRUEBAS.md), catorce comprobaciones manuales que se corren después de cada release.
+That leaves out, on purpose, one half: whether the published package behaves well against the live API and inside an agent. That is what [PRUEBAS.md](PRUEBAS.md) (in Spanish) is for: fourteen manual checks run after every release.
 
-`npm run contrato` cubre una parte de esa mitad sin intervención humana. Los tests
-no tocan la red a propósito, y ese aislamiento tiene un punto ciego: en septiembre
-de 2026 se encontraron cuatro bugs y **tres eran sobre qué manda la API de verdad
-contra qué asumía el paquete**, invisibles para un servidor falso que solo devuelve
-lo que el test escribió. El chequeo de contrato mira justo eso, corre solo una vez
-por día y abre un issue si algo se movió.
+`npm run contrato` covers part of that half with no human in the loop. The tests
+stay off the network on purpose, and that isolation has a blind spot: in
+September 2026 four bugs were found and **three were about what the API really
+sends versus what the package assumed**, invisible to a fake server that only
+returns what the test wrote. The contract check looks at exactly that, runs
+once a day and opens an issue if something moved.
 
-Lo que se encontró y todavía no se arregló vive en [PENDIENTES.md](PENDIENTES.md), con el porqué de cada cosa y lo suficiente para retomarla sin volver a investigarla.
+What has been found and not fixed yet lives in [PENDIENTES.md](PENDIENTES.md) (in Spanish), with the reason for each item and enough context to pick it up without re-investigating.
 
-### Publicar
+### Publishing
 
-Se dispara con un tag y publica desde CI con procedencia, en npm y en el MCP Registry:
+It is triggered by a tag and publishes from CI with provenance, to npm and to the MCP Registry:
 
 ```bash
-npm version <patch|minor|major>   # subir también las dos versiones de server.json, y commitear
+npm version <patch|minor|major>   # also bump the two versions in server.json, and commit
 git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z
 ```
 
-El workflow comprueba primero que el tag coincida con la versión del `package.json` y con las dos de `server.json`, porque **en npm una versión no se puede reusar** y ese error no se deshace. La autenticación es *trusted publishing* por OIDC, sin token: está atada al nombre de `release.yml`, así que renombrar ese archivo rompe la publicación.
+Then create the GitHub Release for that tag: Glama only picks up a new version from a Release, not from the tag. Creating it does not publish again, because `release.yml` runs on tag pushes only.
 
-Con npm arriba, un segundo job le manda el `server.json` al Registry, también por OIDC. Va aparte para que, si el Registry falla, «Re-run failed jobs» reintente solo eso sin volver a pasar por `npm publish`.
+The workflow first checks that the tag matches the version in `package.json` and the two in `server.json`, because **an npm version cannot be reused** and that mistake can't be undone. Authentication is OIDC *trusted publishing*, with no token: it is bound to the name of `release.yml`, so renaming that file breaks publishing.
 
-Para el servidor, `npm version` es la única fuente de la versión: lee el `package.json` publicado para declarar su `serverInfo.version`, y un test del handshake falla si los dos números se separan. El único literal a mano es el de `server.json`, y si queda atrás el tag no pasa la primera comprobación.
+Once npm is up, a second job sends `server.json` to the Registry, also over OIDC. It runs separately so that, if the Registry fails, "Re-run failed jobs" retries only that, without going through `npm publish` again.
 
-## Versionado
+For the server, `npm version` is the single source of the version: it reads the published `package.json` to declare its `serverInfo.version`, and a handshake test fails if the two numbers drift apart. The only hand-written literal is the one in `server.json`, and if it falls behind, the tag doesn't pass the first check.
 
-Desde la `1.0.0` el paquete sigue [semver](https://semver.org/lang/es/). El contrato son las cuatro herramientas, sus parámetros y la forma de sus respuestas:
+## Versioning
 
-- **Parche (`1.0.x`):** arreglos y textos. Las herramientas y sus parámetros quedan iguales.
-- **Menor (`1.x.0`):** lo nuevo que no rompe nada, como una herramienta o un parámetro opcional más.
-- **Mayor (`2.0.0`):** sacar o renombrar una herramienta, o cambiar un parámetro que ya existe. Si alguna vez hace falta, se avisa antes.
+Since `1.0.0` the package follows [semver](https://semver.org/). The contract is the four tools, their parameters and the shape of their responses:
 
-Las respuestas viajan tal cual las sirve la API, así que un campo nuevo puede aparecer en ellas sin una versión nueva del paquete.
+- **Patch (`1.0.x`):** fixes and text. Tools and their parameters stay the same.
+- **Minor (`1.x.0`):** new things that break nothing, like one more tool or optional parameter.
+- **Major (`2.0.0`):** removing or renaming a tool, or changing an existing parameter. If it is ever needed, it will be announced first.
 
-## Licencia
+Responses are passed through exactly as the API serves them, so a new field can show up in them without a new package version.
+
+## License
 
 [MIT](LICENSE)
 

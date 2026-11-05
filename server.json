@@ -1,25 +1,25 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.Jegoba90/cryptocapi",
-  "description": "Análisis de mercado cripto con sello verificable: cada motor firma su análisis con SHA-256.",
+  "description": "Crypto market analysis with a verifiable seal: every engine signs its analysis with SHA-256.",
   "repository": {
     "url": "https://github.com/Jegoba90/cryptocapi-mcp",
     "source": "github"
   },
-  "version": "1.0.2",
+  "version": "1.0.3",
   "websiteUrl": "https://www.cryptocapi.com/docs/agentes",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@cryptocapi/mcp",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "CRYPTOCAPI_API_KEY",
-          "description": "API key de CryptoCapi. Opcional: sin ella se usa la key pública de demostración demo_btc_eth_public, que sirve análisis de bitcoin y ethereum sin registro. Una key propia abre el resto del universo, el motor Quant Pro y Market Scan.",
+          "description": "CryptoCapi API key. Optional: without it, the public demo key demo_btc_eth_public is used, which serves bitcoin and ethereum analysis with no sign-up. Your own key opens the rest of the universe, the Quant Pro engine and Market Scan.",
           "isRequired": false,
           "isSecret": true,
           "format": "string",
