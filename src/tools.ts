@@ -124,7 +124,7 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
     {
       title: 'Análisis de un activo',
       description:
-        'Análisis de un activo con el motor determinista de CryptoCapi. La vista "pulse" ' +
+        'Análisis de un activo con un motor de CryptoCapi: Radar (por defecto) o Quant Plus. La vista "pulse" ' +
         'no exige pase con una key del plan free. La vista "alpha" trae el análisis profundo ' +
         'con el audit_trail y su protocol_hash, que es el sello del cálculo, y requiere el pase ' +
         'Radar Alpha (o Quant Plus si se pide engine="quant_plus"). Con la key pública de ' +
@@ -133,9 +133,22 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'aunque se pida "pulse". ' +
         'Al leer la respuesta: `z_score` mide el MOVIMIENTO del último día cerrado (UTC), no el ' +
         'del día en curso, contra los movimientos pasados, y la posición en Bandas de Bollinger ' +
-        'mide el NIVEL de precio contra su rango. Son ejes distintos: precio en el tercio ' +
-        'superior con z_score negativo no es una contradicción, es un nivel alto después de un ' +
-        'día que cerró con una caída fuerte. No las mezcles en una sola frase. ' +
+        '(`band_position`) mide el NIVEL de precio contra su rango. Son ejes distintos: precio en ' +
+        'el tercio superior con z_score negativo no es una contradicción, es un nivel alto después ' +
+        'de un día que cerró con una caída fuerte. No las mezcles en una sola frase. ' +
+        '`market_regime` lee ese mismo día: BULLISH_TREND y BEARISH_TREND dicen que subió o bajó ' +
+        'más de 2 % o cerró fuera de sus bandas, no que haya una tendencia de varios días. ' +
+        '`volatility_momentum` dice si las bandas se abren (EXPANDING) o se cierran (COMPRESSING): ' +
+        'contrastá el texto del análisis contra ese campo y contra `band_position`. ' +
+        '`last_close_date` es el día UTC que miden todos los números: dos lecturas del mismo día ' +
+        'dan los mismos valores, y eso no es un dato viejo. Las lecturas anteriores pueden no ' +
+        'traer estos campos. ' +
+        'En Radar, `analysis.detailed_report` lo escribe Python: primero la matemática del último ' +
+        'día cerrado y después, por cada nota de prensa de las últimas 48 horas, «<medio> informa ' +
+        'que…» (una línea de un modelo de lenguaje que pasó la verificación contra la nota: cada ' +
+        'cifra y cada nombre propio están en ella) o «<medio> titula: «…»» (la línea no pasó y sale ' +
+        'el titular tal cual). Cada nota trae su enlace en `sources_verified`. El sentimiento lo da ' +
+        'el z_score, no el modelo. No le atribuyas a un medio más de lo que dice su línea. ' +
         'Las stablecoins se leen por la distancia de su último cierre al dólar, no por el z_score. ' +
         'Si la moneda todavía no tiene análisis, la respuesta es ' +
         '`{"status":"success","data":null}`: no es un error ni un fallo de la ' +
@@ -219,7 +232,10 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
     {
       title: 'Ranking de Market Scan',
       description:
-        'Recorre el mercado y devuelve los activos mejor rankeados según una estrategia. ' +
+        'Ordena el universo curado de Quant Plus por cuánto se movió cada activo el último día ' +
+        'cerrado, medido contra su propio umbral de anomalía (`threshold_proximity`: 1.0 o más ' +
+        'es un día anómalo). No es un camino hacia una señal: el z del día siguiente se mide de ' +
+        'nuevo, y en la mayoría de los días el primero queda lejos de su umbral. ' +
         'Requiere el pase Market Scan, que se vende aparte de Quant Plus aunque el ranking ' +
         'se arme sobre sus señales. El ranking cubre el universo curado de Quant Plus, ' +
         'bastante más chico que el conjunto de activos que CryptoCapi sigue, así que ' +
@@ -228,7 +244,10 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         strategy: z
           .enum(['balanced', 'aggressive', 'conservative'])
           .optional()
-          .describe('Perfil del ranking. Por defecto "balanced".'),
+          .describe(
+            'Por defecto "balanced". Hoy las tres devuelven el mismo orden: cada activo tiene la ' +
+              'muestra completa, así que el eje de la evidencia vale 1 para todos. Ninguna filtra.'
+          ),
         limit: z
           .number()
           .int()
