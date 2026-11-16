@@ -1,6 +1,6 @@
 {
   "name": "@cryptocapi/mcp",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "mcpName": "io.github.Jegoba90/cryptocapi",
   "description": "Crypto market analysis with a verifiable SHA-256 seal, as native tools for any MCP agent. Three engines plus Market Scan; try it with npx, no account needed.",
   "type": "module",
