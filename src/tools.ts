@@ -236,6 +236,10 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
         'cerrado, medido contra su propio umbral de anomalía (`threshold_proximity`: 1.0 o más ' +
         'es un día anómalo). No es un camino hacia una señal: el z del día siguiente se mide de ' +
         'nuevo, y en la mayoría de los días el primero queda lejos de su umbral. ' +
+        'Cada fila trae `last_close_date` (el día UTC que miden sus números) y el ' +
+        '`protocol_hash` y la `engine_version` de la lectura de Quant Plus que ordena. Las ' +
+        'stablecoins entran solo con la paridad rota (PEG_BROKEN), medidas por su distancia ' +
+        'al dólar. ' +
         'Requiere el pase Market Scan, que se vende aparte de Quant Plus aunque el ranking ' +
         'se arme sobre sus señales. El ranking cubre el universo curado de Quant Plus, ' +
         'bastante más chico que el conjunto de activos que CryptoCapi sigue, así que ' +
@@ -256,7 +260,8 @@ export function registerTools(server: McpServer, client: CryptoCapiClient): void
           .optional()
           .describe(
             'Cuántos activos devolver, de 1 a 50. Por defecto 10. Es un techo del pedido: ' +
-              'si el universo rankeado es menor, vuelven menos.'
+              'si el universo rankeado es menor, vuelven menos. `universe_count` dice cuántos ' +
+              'activos pasaron los filtros.'
           ),
       },
       annotations: SOLO_LECTURA,
