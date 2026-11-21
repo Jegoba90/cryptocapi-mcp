@@ -22,9 +22,12 @@
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-007bff?style=flat-square&labelColor=333333"></a>
 </p>
 
-<p align="center">
-  <a href="https://glama.ai/mcp/servers/Jegoba90/cryptocapi-mcp"><img alt="CryptoCapi MCP server on Glama" src="https://glama.ai/mcp/servers/Jegoba90/cryptocapi-mcp/badges/score.svg"></a>
-</p>
+<div align="center">
+
+<a href="https://glama.ai/mcp/servers/Jegoba90/cryptocapi-mcp"><img alt="CryptoCapi MCP server on Glama" src="https://glama.ai/mcp/servers/Jegoba90/cryptocapi-mcp/badges/score.svg"></a>
+[![M8ven Score](https://m8ven.ai/badge/mcp/jegoba90-cryptocapi-mcp-c0vg8s?v=015eb5dcc2625e89f64ce4c120ae368f)](https://m8ven.ai/mcp/jegoba90-cryptocapi-mcp-c0vg8s?s=readme)
+
+</div>
 
 <p align="center">
   <a href="#paste-this-and-it-works">Get started</a>
@@ -277,10 +280,4 @@ Responses are passed through exactly as the API serves them, so a new field can 
   <a href="https://www.npmjs.com/package/@cryptocapi/mcp">npm</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/Jegoba90/cryptocapi-mcp/issues">Issues</a>
-</p>
-
-<p align="center">
-
-[![M8ven Score](https://m8ven.ai/badge/mcp/jegoba90-cryptocapi-mcp-c0vg8s?v=015eb5dcc2625e89f64ce4c120ae368f)](https://m8ven.ai/mcp/jegoba90-cryptocapi-mcp-c0vg8s?s=readme)
-
 </p>
