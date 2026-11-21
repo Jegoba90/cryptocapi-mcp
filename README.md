@@ -278,3 +278,9 @@ Responses are passed through exactly as the API serves them, so a new field can 
   &nbsp;·&nbsp;
   <a href="https://github.com/Jegoba90/cryptocapi-mcp/issues">Issues</a>
 </p>
+
+<p align="center">
+
+[![M8ven Score](https://m8ven.ai/badge/mcp/jegoba90-cryptocapi-mcp-c0vg8s?v=015eb5dcc2625e89f64ce4c120ae368f)](https://m8ven.ai/mcp/jegoba90-cryptocapi-mcp-c0vg8s?s=readme)
+
+</p>
